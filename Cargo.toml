@@ -1,20 +1,20 @@
 [workspace]
 resolver = "2"
 members = [
-  "substrate/primitives",
+  "src/primitives",
 
-  "substrate/coins/primitives",
-  "substrate/coins/pallet",
+  "src/coins/primitives",
+  "src/coins/pallet",
 
-  "substrate/validator-sets/primitives",
-  "substrate/validator-sets/pallet",
+  "src/validator-sets/primitives",
+  "src/validator-sets/pallet",
 
-  "substrate/abi",
+  "src/abi",
 
-  "substrate/runtime",
-  "substrate/node",
+  "src/runtime",
+  "src/node",
 
-  "substrate/client",
+  "src/client",
 ]
 
 # Always compile Monero (and a variety of dependencies) with optimizations due
