@@ -34,19 +34,13 @@ frame-system = { git = "https://github.com/serai-dex/substrate", optional = true
 
 async-lock = "3"
 
-simple-request = { path = "../../common/request", version = "0.1", optional = true }
-
-ciphersuite = { path = "../../crypto/ciphersuite", version = "0.4", optional = true }
+simple-request = { git = "https://github.com/serai-dex/serai",version = "0.1", optional = true }
 
 [dev-dependencies]
 rand_core = "0.6"
 hex = "0.4"
 
 blake2 = "0.10"
-
-ciphersuite = { path = "../../crypto/ciphersuite", features = ["ristretto"] }
-frost = { package = "modular-frost", path = "../../crypto/frost", features = ["tests"] }
-schnorrkel = { path = "../../crypto/schnorrkel", package = "frost-schnorrkel" }
 
 tokio = "1"
 

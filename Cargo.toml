@@ -1,21 +1,6 @@
 [workspace]
 resolver = "2"
 members = [
-  "crypto/transcript",
-
-  "crypto/ff-group-tests",
-  "crypto/dalek-ff-group",
-  "crypto/ed448",
-  "crypto/ciphersuite",
-
-  "crypto/multiexp",
-
-  "crypto/schnorr",
-  "crypto/dleq",
-  "crypto/dkg",
-  "crypto/frost",
-  "crypto/schnorrkel",
-
   "substrate/primitives",
 
   "substrate/coins/primitives",
