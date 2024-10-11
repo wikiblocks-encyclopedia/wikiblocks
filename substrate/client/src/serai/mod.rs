@@ -157,6 +157,7 @@ impl Serai {
     Ok(res)
   }
 
+  #[allow(dead_code)]
   fn unsigned(call: Call) -> Transaction {
     Transaction::new(call, None)
   }

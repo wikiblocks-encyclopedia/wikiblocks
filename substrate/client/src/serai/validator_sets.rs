@@ -1,15 +1,12 @@
 use scale::Encode;
 
-use sp_core::sr25519::{Public, Signature};
+use sp_core::sr25519::Public;
 
-use serai_abi::{primitives::Amount, validator_sets::primitives::ExternalValidatorSet};
+use serai_abi::primitives::Amount;
 pub use serai_abi::validator_sets::primitives;
-use primitives::{Session, KeyPair};
+use primitives::Session;
 
-use crate::{
-  primitives::{NetworkId, ExternalNetworkId, SeraiAddress},
-  Transaction, Serai, TemporalSerai, SeraiError,
-};
+use crate::{primitives::NetworkId, TemporalSerai, SeraiError};
 
 const PALLET: &str = "ValidatorSets";
 
@@ -41,40 +38,6 @@ impl<'a> SeraiValidatorSets<'a> {
       .events(|event| {
         if let serai_abi::Event::ValidatorSets(event) = event {
           if matches!(event, ValidatorSetsEvent::ParticipantRemoved { .. }) {
-            Some(event.clone())
-          } else {
-            None
-          }
-        } else {
-          None
-        }
-      })
-      .await
-  }
-
-  pub async fn key_gen_events(&self) -> Result<Vec<ValidatorSetsEvent>, SeraiError> {
-    self
-      .0
-      .events(|event| {
-        if let serai_abi::Event::ValidatorSets(event) = event {
-          if matches!(event, ValidatorSetsEvent::KeyGen { .. }) {
-            Some(event.clone())
-          } else {
-            None
-          }
-        } else {
-          None
-        }
-      })
-      .await
-  }
-
-  pub async fn accepted_handover_events(&self) -> Result<Vec<ValidatorSetsEvent>, SeraiError> {
-    self
-      .0
-      .events(|event| {
-        if let serai_abi::Event::ValidatorSets(event) = event {
-          if matches!(event, ValidatorSetsEvent::AcceptedHandover { .. }) {
             Some(event.clone())
           } else {
             None
@@ -166,18 +129,6 @@ impl<'a> SeraiValidatorSets<'a> {
     self.0.runtime_api("SeraiRuntimeApi_validators", network).await
   }
 
-  // TODO: Store these separately since we almost never need both at once?
-  pub async fn keys(&self, set: ExternalValidatorSet) -> Result<Option<KeyPair>, SeraiError> {
-    self.0.storage(PALLET, "Keys", (sp_core::hashing::twox_64(&set.encode()), set)).await
-  }
-
-  pub async fn key_pending_slash_report(
-    &self,
-    network: ExternalNetworkId,
-  ) -> Result<Option<Public>, SeraiError> {
-    self.0.storage(PALLET, "PendingSlashReport", network).await
-  }
-
   pub async fn session_begin_block(
     &self,
     network: NetworkId,
@@ -186,41 +137,11 @@ impl<'a> SeraiValidatorSets<'a> {
     self.0.storage(PALLET, "SessionBeginBlock", (network, session)).await
   }
 
-  pub fn set_keys(
-    network: ExternalNetworkId,
-    removed_participants: sp_runtime::BoundedVec<
-      SeraiAddress,
-      sp_core::ConstU32<{ primitives::MAX_KEY_SHARES_PER_SET / 3 }>,
-    >,
-    key_pair: KeyPair,
-    signature: Signature,
-  ) -> Transaction {
-    Serai::unsigned(serai_abi::Call::ValidatorSets(serai_abi::validator_sets::Call::set_keys {
-      network,
-      removed_participants,
-      key_pair,
-      signature,
-    }))
-  }
-
   pub fn allocate(network: NetworkId, amount: Amount) -> serai_abi::Call {
     serai_abi::Call::ValidatorSets(serai_abi::validator_sets::Call::allocate { network, amount })
   }
 
   pub fn deallocate(network: NetworkId, amount: Amount) -> serai_abi::Call {
     serai_abi::Call::ValidatorSets(serai_abi::validator_sets::Call::deallocate { network, amount })
-  }
-
-  pub fn report_slashes(
-    network: ExternalNetworkId,
-    slashes: sp_runtime::BoundedVec<
-      (SeraiAddress, u32),
-      sp_core::ConstU32<{ primitives::MAX_KEY_SHARES_PER_SET / 3 }>,
-    >,
-    signature: Signature,
-  ) -> Transaction {
-    Serai::unsigned(serai_abi::Call::ValidatorSets(
-      serai_abi::validator_sets::Call::report_slashes { network, slashes, signature },
-    ))
   }
 }

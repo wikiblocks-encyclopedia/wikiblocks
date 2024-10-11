@@ -6,8 +6,7 @@ use scale::{Encode, Decode};
 use scale_info::TypeInfo;
 
 use sp_std::{vec, vec::Vec};
-use sp_core::sr25519::{Public, Signature};
-use sp_application_crypto::RuntimePublic;
+use sp_core::sr25519::Public;
 use sp_session::{ShouldEndSession, GetSessionNumber, GetValidatorCount};
 use sp_runtime::{KeyTypeId, ConsensusEngineId, traits::IsMember};
 use sp_staking::offence::{ReportOffence, Offence, OffenceError};
@@ -311,17 +310,6 @@ pub mod pallet {
     OptionQuery,
   >;
 
-  /// The generated key pair for a given validator set instance.
-  #[pallet::storage]
-  #[pallet::getter(fn keys)]
-  pub type Keys<T: Config> =
-    StorageMap<_, Twox64Concat, ExternalValidatorSet, KeyPair, OptionQuery>;
-
-  /// The key for validator sets which can (and still need to) publish their slash reports.
-  #[pallet::storage]
-  pub type PendingSlashReport<T: Config> =
-    StorageMap<_, Identity, ExternalNetworkId, Public, OptionQuery>;
-
   /// Disabled validators.
   #[pallet::storage]
   pub type SeraiDisabledIndices<T: Config> = StorageMap<_, Identity, u32, Public, OptionQuery>;
@@ -341,10 +329,6 @@ pub mod pallet {
     ParticipantRemoved {
       set: ValidatorSet,
       removed: T::AccountId,
-    },
-    KeyGen {
-      set: ExternalValidatorSet,
-      key_pair: KeyPair,
     },
     AcceptedHandover {
       set: ValidatorSet,
@@ -556,14 +540,11 @@ pub mod pallet {
 
       // If they're in the current set, and the current set has completed its handover (so its
       // currently being tracked by TotalAllocatedStake), update the TotalAllocatedStake
-      if let Some(session) = Self::session(network) {
-        if InSet::<T>::contains_key(network, account) && Self::handover_completed(network, session)
-        {
-          TotalAllocatedStake::<T>::set(
-            network,
-            Some(Amount(TotalAllocatedStake::<T>::get(network).unwrap_or(Amount(0)).0 + amount.0)),
-          );
-        }
+      if InSet::<T>::contains_key(network, account) {
+        TotalAllocatedStake::<T>::set(
+          network,
+          Some(Amount(TotalAllocatedStake::<T>::get(network).unwrap_or(Amount(0)).0 + amount.0)),
+        );
       }
 
       Ok(())
@@ -678,50 +659,8 @@ pub mod pallet {
       Ok(false)
     }
 
-    // Checks if this session has completed the handover from the prior session.
-    fn handover_completed(network: NetworkId, session: Session) -> bool {
-      let Some(current_session) = Self::session(network) else { return false };
-
-      // If the session we've been queried about is old, it must have completed its handover
-      if current_session.0 > session.0 {
-        return true;
-      }
-      // If the session we've been queried about has yet to start, it can't have completed its
-      // handover
-      if current_session.0 < session.0 {
-        return false;
-      }
-
-      let NetworkId::External(n) = network else {
-        // Handover is automatically complete for Serai as it doesn't have a handover protocol
-        return true;
-      };
-
-      // The current session must have set keys for its handover to be completed
-      if !Keys::<T>::contains_key(ExternalValidatorSet { network: n, session }) {
-        return false;
-      }
-
-      // This must be the first session (which has set keys) OR the prior session must have been
-      // retired (signified by its keys no longer being present)
-      (session.0 == 0) ||
-        (!Keys::<T>::contains_key(ExternalValidatorSet {
-          network: n,
-          session: Session(session.0 - 1),
-        }))
-    }
-
     fn new_session() {
-      for network in serai_primitives::NETWORKS {
-        // If this network hasn't started sessions yet, don't start one now
-        let Some(current_session) = Self::session(network) else { continue };
-        // Only spawn a new set if:
-        // - This is Serai, as we need to rotate Serai upon a new session (per Babe)
-        // - The current set was actually established with a completed handover protocol
-        if (network == NetworkId::Serai) || Self::handover_completed(network, current_session) {
-          Pallet::<T>::new_set(network);
-        }
-      }
+      Pallet::<T>::new_set(NetworkId::Serai);
     }
 
     fn set_total_allocated_stake(network: NetworkId) {
@@ -736,24 +675,8 @@ pub mod pallet {
     // TODO: This is called retire_set, yet just starts retiring the set
     // Update the nomenclature within this function
     pub fn retire_set(set: ValidatorSet) {
-      // Serai doesn't set keys and network slashes are handled by BABE/GRANDPA
-      if let NetworkId::External(n) = set.network {
-        // If the prior prior set didn't report, emit they're retired now
-        if PendingSlashReport::<T>::get(n).is_some() {
-          Self::deposit_event(Event::SetRetired {
-            set: ValidatorSet { network: set.network, session: Session(set.session.0 - 1) },
-          });
-        }
-
-        // This overwrites the prior value as the prior to-report set's stake presumably just
-        // unlocked, making their report unenforceable
-        let keys =
-          Keys::<T>::take(ExternalValidatorSet { network: n, session: set.session }).unwrap();
-        PendingSlashReport::<T>::set(n, Some(keys.0));
-      } else {
-        // emit the event for serai network
-        Self::deposit_event(Event::SetRetired { set });
-      }
+      // emit the event for serai network
+      Self::deposit_event(Event::SetRetired { set });
 
       // We're retiring this set because the set after it accepted the handover
       Self::deposit_event(Event::AcceptedHandover {
@@ -772,10 +695,6 @@ pub mod pallet {
       session: Session,
       key: Public,
     ) -> Option<Amount> {
-      // Check this Session has properly started, completing the handover from the prior session.
-      if !Self::handover_completed(network, session) {
-        return None;
-      }
       PendingDeallocations::<T>::take((network, key), session)
     }
 
@@ -941,75 +860,6 @@ pub mod pallet {
   impl<T: Config> Pallet<T> {
     #[pallet::call_index(0)]
     #[pallet::weight(0)] // TODO
-    pub fn set_keys(
-      origin: OriginFor<T>,
-      network: ExternalNetworkId,
-      removed_participants: BoundedVec<Public, ConstU32<{ MAX_KEY_SHARES_PER_SET / 3 }>>,
-      key_pair: KeyPair,
-      signature: Signature,
-    ) -> DispatchResult {
-      ensure_none(origin)?;
-
-      // signature isn't checked as this is an unsigned transaction, and validate_unsigned
-      // (called by pre_dispatch) checks it
-      let _ = signature;
-
-      let session = Self::session(NetworkId::from(network)).unwrap();
-      let set = ExternalValidatorSet { network, session };
-
-      Keys::<T>::set(set, Some(key_pair.clone()));
-
-      // If this is the first ever set for this network, set TotalAllocatedStake now
-      // We generally set TotalAllocatedStake when the prior set retires, and the new set is fully
-      // active and liable. Since this is the first set, there is no prior set to wait to retire
-      if session == Session(0) {
-        Self::set_total_allocated_stake(NetworkId::from(network));
-      }
-
-      // This does not remove from TotalAllocatedStake or InSet in order to:
-      // 1) Not decrease the stake present in this set. This means removed participants are
-      //    still liable for the economic security of the external network. This prevents
-      //    a decided set, which is economically secure, from falling below the threshold.
-      // 2) Not allow parties removed to immediately deallocate, per commentary on deallocation
-      //    scheduling (https://github.com/serai-dex/serai/issues/394).
-      for removed in removed_participants {
-        Self::deposit_event(Event::ParticipantRemoved { set: set.into(), removed });
-      }
-      Self::deposit_event(Event::KeyGen { set, key_pair });
-
-      Ok(())
-    }
-
-    #[pallet::call_index(1)]
-    #[pallet::weight(0)] // TODO
-    pub fn report_slashes(
-      origin: OriginFor<T>,
-      network: ExternalNetworkId,
-      slashes: BoundedVec<(Public, u32), ConstU32<{ MAX_KEY_SHARES_PER_SET / 3 }>>,
-      signature: Signature,
-    ) -> DispatchResult {
-      ensure_none(origin)?;
-
-      // signature isn't checked as this is an unsigned transaction, and validate_unsigned
-      // (called by pre_dispatch) checks it
-      let _ = signature;
-
-      // TODO: Handle slashes
-      let _ = slashes;
-
-      // Emit set retireed
-      Pallet::<T>::deposit_event(Event::SetRetired {
-        set: ValidatorSet {
-          network: network.into(),
-          session: Session(Self::session(NetworkId::from(network)).unwrap().0 - 1),
-        },
-      });
-
-      Ok(())
-    }
-
-    #[pallet::call_index(2)]
-    #[pallet::weight(0)] // TODO
     pub fn allocate(origin: OriginFor<T>, network: NetworkId, amount: Amount) -> DispatchResult {
       let validator = ensure_signed(origin)?;
       Coins::<T>::transfer_internal(
@@ -1020,7 +870,7 @@ pub mod pallet {
       Self::increase_allocation(network, validator, amount, false)
     }
 
-    #[pallet::call_index(3)]
+    #[pallet::call_index(1)]
     #[pallet::weight(0)] // TODO
     pub fn deallocate(origin: OriginFor<T>, network: NetworkId, amount: Amount) -> DispatchResult {
       let account = ensure_signed(origin)?;
@@ -1037,7 +887,7 @@ pub mod pallet {
       Ok(())
     }
 
-    #[pallet::call_index(4)]
+    #[pallet::call_index(2)]
     #[pallet::weight((0, DispatchClass::Operational))] // TODO
     pub fn claim_deallocation(
       origin: OriginFor<T>,
@@ -1055,120 +905,6 @@ pub mod pallet {
       )?;
       Self::deposit_event(Event::DeallocationClaimed { validator: account, network, session });
       Ok(())
-    }
-  }
-
-  #[pallet::validate_unsigned]
-  impl<T: Config> ValidateUnsigned for Pallet<T> {
-    type Call = Call<T>;
-
-    fn validate_unsigned(_: TransactionSource, call: &Self::Call) -> TransactionValidity {
-      // Match to be exhaustive
-      match call {
-        Call::set_keys { network, ref removed_participants, ref key_pair, ref signature } => {
-          let network = *network;
-
-          // Confirm this set has a session
-          let Some(current_session) = Self::session(NetworkId::from(network)) else {
-            Err(InvalidTransaction::Custom(1))?
-          };
-
-          let set = ExternalValidatorSet { network, session: current_session };
-
-          // Confirm it has yet to set keys
-          if Keys::<T>::get(set).is_some() {
-            Err(InvalidTransaction::Stale)?;
-          }
-
-          // This is a needed precondition as this uses storage variables for the latest decided
-          // session on this assumption
-          assert_eq!(Pallet::<T>::latest_decided_session(network.into()), Some(current_session));
-
-          // This does not slash the removed participants as that'll be done at the end of the
-          // set's lifetime
-          let mut removed = hashbrown::HashSet::new();
-          for participant in removed_participants {
-            // Confirm this wasn't duplicated
-            if removed.contains(&participant.0) {
-              Err(InvalidTransaction::Custom(2))?;
-            }
-            removed.insert(participant.0);
-          }
-
-          let participants = Participants::<T>::get(NetworkId::from(network))
-            .expect("session existed without participants");
-
-          let mut all_key_shares = 0;
-          let mut signers = vec![];
-          let mut signing_key_shares = 0;
-          for participant in participants {
-            let participant = participant.0;
-            let shares = InSet::<T>::get(NetworkId::from(network), participant)
-              .expect("participant from Participants wasn't InSet");
-            all_key_shares += shares;
-
-            if removed.contains(&participant.0) {
-              continue;
-            }
-
-            signers.push(participant);
-            signing_key_shares += shares;
-          }
-
-          {
-            let f = all_key_shares - signing_key_shares;
-            if signing_key_shares < ((2 * f) + 1) {
-              Err(InvalidTransaction::Custom(3))?;
-            }
-          }
-
-          // Verify the signature with the MuSig key of the signers
-          // We theoretically don't need set_keys_message to bind to removed_participants, as the
-          // key we're signing with effectively already does so, yet there's no reason not to
-          if !musig_key(set.into(), &signers)
-            .verify(&set_keys_message(&set, removed_participants, key_pair), signature)
-          {
-            Err(InvalidTransaction::BadProof)?;
-          }
-
-          ValidTransaction::with_tag_prefix("ValidatorSets")
-            .and_provides((0, set))
-            .longevity(u64::MAX)
-            .propagate(true)
-            .build()
-        }
-        Call::report_slashes { network, ref slashes, ref signature } => {
-          let network = *network;
-          let Some(key) = PendingSlashReport::<T>::take(network) else {
-            // Assumed already published
-            Err(InvalidTransaction::Stale)?
-          };
-
-          // There must have been a previous session is PendingSlashReport is populated
-          let set = ExternalValidatorSet {
-            network,
-            session: Session(Self::session(NetworkId::from(network)).unwrap().0 - 1),
-          };
-          if !key.verify(&report_slashes_message(&set, slashes), signature) {
-            Err(InvalidTransaction::BadProof)?;
-          }
-
-          ValidTransaction::with_tag_prefix("ValidatorSets")
-            .and_provides((1, set))
-            .longevity(MAX_KEY_SHARES_PER_SET.into())
-            .propagate(true)
-            .build()
-        }
-        Call::allocate { .. } | Call::deallocate { .. } | Call::claim_deallocation { .. } => {
-          Err(InvalidTransaction::Call)?
-        }
-        Call::__Ignore(_, _) => unreachable!(),
-      }
-    }
-
-    // Explicitly provide a pre-dispatch which calls validate_unsigned
-    fn pre_dispatch(call: &Self::Call) -> Result<(), TransactionValidityError> {
-      Self::validate_unsigned(TransactionSource::InBlock, call).map(|_| ()).map_err(Into::into)
     }
   }
 

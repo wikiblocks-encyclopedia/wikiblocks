@@ -5,8 +5,6 @@ use scale::{Encode, Decode};
 use serai_abi::Call;
 
 use crate::{
-  Vec,
-  primitives::{PublicKey, SeraiAddress},
   timestamp, coins,
   validator_sets::{self, MembershipProof},
   babe, grandpa, RuntimeCall,
@@ -30,33 +28,6 @@ impl From<Call> for RuntimeCall {
         }
       },
       Call::ValidatorSets(vs) => match vs {
-        serai_abi::validator_sets::Call::set_keys {
-          network,
-          removed_participants,
-          key_pair,
-          signature,
-        } => RuntimeCall::ValidatorSets(validator_sets::Call::set_keys {
-          network,
-          removed_participants: <_>::try_from(
-            removed_participants.into_iter().map(PublicKey::from).collect::<Vec<_>>(),
-          )
-          .unwrap(),
-          key_pair,
-          signature,
-        }),
-        serai_abi::validator_sets::Call::report_slashes { network, slashes, signature } => {
-          RuntimeCall::ValidatorSets(validator_sets::Call::report_slashes {
-            network,
-            slashes: <_>::try_from(
-              slashes
-                .into_iter()
-                .map(|(addr, slash)| (PublicKey::from(addr), slash))
-                .collect::<Vec<_>>(),
-            )
-            .unwrap(),
-            signature,
-          })
-        }
         serai_abi::validator_sets::Call::allocate { network, amount } => {
           RuntimeCall::ValidatorSets(validator_sets::Call::allocate { network, amount })
         }
@@ -126,30 +97,6 @@ impl TryInto<Call> for RuntimeCall {
         _ => Err(())?,
       }),
       RuntimeCall::ValidatorSets(call) => Call::ValidatorSets(match call {
-        validator_sets::Call::set_keys { network, removed_participants, key_pair, signature } => {
-          serai_abi::validator_sets::Call::set_keys {
-            network,
-            removed_participants: <_>::try_from(
-              removed_participants.into_iter().map(SeraiAddress::from).collect::<Vec<_>>(),
-            )
-            .unwrap(),
-            key_pair,
-            signature,
-          }
-        }
-        validator_sets::Call::report_slashes { network, slashes, signature } => {
-          serai_abi::validator_sets::Call::report_slashes {
-            network,
-            slashes: <_>::try_from(
-              slashes
-                .into_iter()
-                .map(|(addr, slash)| (SeraiAddress::from(addr), slash))
-                .collect::<Vec<_>>(),
-            )
-            .unwrap(),
-            signature,
-          }
-        }
         validator_sets::Call::allocate { network, amount } => {
           serai_abi::validator_sets::Call::allocate { network, amount }
         }
