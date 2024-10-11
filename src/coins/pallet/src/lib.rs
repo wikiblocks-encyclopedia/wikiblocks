@@ -1,23 +1,11 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
-use wikiblocks_primitives::{Balance, Coin, ExternalBalance, SubstrateAmount};
-
-pub trait AllowMint {
-  fn is_allowed(balance: &ExternalBalance) -> bool;
-}
-
-impl AllowMint for () {
-  fn is_allowed(_: &ExternalBalance) -> bool {
-    true
-  }
-}
-
 // TODO: Investigate why Substrate generates this
 #[allow(unreachable_patterns, clippy::cast_possible_truncation)]
 #[frame_support::pallet]
 pub mod pallet {
   use super::*;
-  use sp_std::{vec::Vec, any::TypeId};
+  use sp_std::vec::Vec;
   use sp_core::sr25519::Public;
   use sp_runtime::{
     traits::{DispatchInfoOf, PostDispatchInfoOf},
@@ -33,18 +21,15 @@ pub mod pallet {
   pub use coins_primitives as primitives;
   use primitives::*;
 
-  type LiquidityTokensInstance = crate::Instance1;
-
   #[pallet::config]
   pub trait Config<I: 'static = ()>: frame_system::Config<AccountId = Public> {
     type RuntimeEvent: From<Event<Self, I>> + IsType<<Self as frame_system::Config>::RuntimeEvent>;
-    type AllowMint: AllowMint;
   }
 
   #[pallet::genesis_config]
   #[derive(Clone, PartialEq, Eq, Debug, Encode, Decode)]
   pub struct GenesisConfig<T: Config<I>, I: 'static = ()> {
-    pub accounts: Vec<(T::AccountId, Balance)>,
+    pub accounts: Vec<(T::AccountId, SubstrateAmount)>,
     pub _ignore: PhantomData<I>,
   }
 
@@ -58,17 +43,15 @@ pub mod pallet {
   pub enum Error<T, I = ()> {
     AmountOverflowed,
     NotEnoughCoins,
-    BurnWithInstructionNotAllowed,
     MintNotAllowed,
   }
 
   #[pallet::event]
   #[pallet::generate_deposit(fn deposit_event)]
   pub enum Event<T: Config<I>, I: 'static = ()> {
-    Mint { to: Public, balance: Balance },
-    Burn { from: Public, balance: Balance },
-    BurnWithInstruction { from: Public, instruction: OutInstructionWithBalance },
-    Transfer { from: Public, to: Public, balance: Balance },
+    Mint { to: Public, amount: SubstrateAmount },
+    Burn { from: Public, amount: SubstrateAmount },
+    Transfer { from: Public, to: Public, amount: SubstrateAmount },
   }
 
   #[pallet::pallet]
@@ -80,24 +63,18 @@ pub mod pallet {
   #[pallet::storage]
   #[pallet::getter(fn balances)]
   pub type Balances<T: Config<I>, I: 'static = ()> =
-    StorageDoubleMap<_, Blake2_128Concat, Public, Identity, Coin, SubstrateAmount, ValueQuery>;
+    StorageMap<_, Blake2_128Concat, Public, SubstrateAmount, OptionQuery>;
 
   /// The total supply of each coin.
   // We use Identity type here again due to reasons stated in the Balances Storage.
   #[pallet::storage]
   #[pallet::getter(fn supply)]
-  pub type Supply<T: Config<I>, I: 'static = ()> =
-    StorageMap<_, Identity, Coin, SubstrateAmount, ValueQuery>;
+  pub type Supply<T: Config<I>, I: 'static = ()> = StorageValue<_, SubstrateAmount, ValueQuery>;
 
   #[pallet::genesis_build]
   impl<T: Config<I>, I: 'static> BuildGenesisConfig for GenesisConfig<T, I> {
     fn build(&self) {
-      // initialize the supply of the coins
-      // TODO: Don't use COINS yet GenesisConfig so we can safely expand COINS
-      for c in &COINS {
-        Supply::<T, I>::set(c, 0);
-      }
-
+      Supply::<T, I>::set(0);
       // initialize the genesis accounts
       for (account, balance) in &self.accounts {
         Pallet::<T, I>::mint(*account, *balance).unwrap();
@@ -105,95 +82,63 @@ pub mod pallet {
     }
   }
 
-  #[pallet::hooks]
-  impl<T: Config<I>, I: 'static> Hooks<BlockNumberFor<T>> for Pallet<T, I> {
-    fn on_initialize(_: BlockNumberFor<T>) -> Weight {
-      // burn the fees collected previous block
-      let coin = Coin::Serai;
-      let amount = Self::balance(FEE_ACCOUNT.into(), coin);
-      // we can unwrap, we are not burning more then what we have
-      // If this errors, it'll halt the runtime however (due to being called at the start of every
-      // block), requiring extra care when reviewing
-      Self::burn_internal(FEE_ACCOUNT.into(), Balance { coin, amount }).unwrap();
-      Weight::zero() // TODO
-    }
-  }
-
   impl<T: Config<I>, I: 'static> Pallet<T, I> {
-    /// Returns the balance of a given account for `coin`.
-    pub fn balance(of: Public, coin: Coin) -> Amount {
-      Amount(Self::balances(of, coin))
-    }
-
-    fn decrease_balance_internal(from: Public, balance: Balance) -> Result<(), Error<T, I>> {
-      let coin = &balance.coin;
-
+    fn decrease_balance_internal(from: Public, amount: SubstrateAmount) -> Result<(), Error<T, I>> {
       // sub amount from account
-      let new_amount = Self::balances(from, coin)
-        .checked_sub(balance.amount.0)
+      let new_amount = Self::balances(from)
+        .ok_or(Error::<T, I>::NotEnoughCoins)?
+        .checked_sub(amount)
         .ok_or(Error::<T, I>::NotEnoughCoins)?;
 
       // save
       if new_amount == 0 {
-        Balances::<T, I>::remove(from, coin);
+        Balances::<T, I>::remove(from);
       } else {
-        Balances::<T, I>::set(from, coin, new_amount);
+        Balances::<T, I>::set(from, Some(new_amount));
       }
       Ok(())
     }
 
-    fn increase_balance_internal(to: Public, balance: Balance) -> Result<(), Error<T, I>> {
-      let coin = &balance.coin;
-
+    fn increase_balance_internal(to: Public, amount: SubstrateAmount) -> Result<(), Error<T, I>> {
       // add amount to account
-      let new_amount = Self::balances(to, coin)
-        .checked_add(balance.amount.0)
+      let new_amount = Self::balances(to)
+        .unwrap_or(0)
+        .checked_add(amount)
         .ok_or(Error::<T, I>::AmountOverflowed)?;
 
       // save
-      Balances::<T, I>::set(to, coin, new_amount);
+      Balances::<T, I>::set(to, Some(new_amount));
       Ok(())
     }
 
     /// Mint `balance` to the given account.
     ///
     /// Errors if any amount overflows.
-    pub fn mint(to: Public, balance: Balance) -> Result<(), Error<T, I>> {
-      // If the coin isn't Serai, which we're always allowed to mint, and the mint isn't explicitly
-      // allowed, error
-      if !ExternalCoin::try_from(balance.coin)
-        .map(|coin| T::AllowMint::is_allowed(&ExternalBalance { coin, amount: balance.amount }))
-        .unwrap_or(true)
-      {
-        Err(Error::<T, I>::MintNotAllowed)?;
-      }
-
+    pub fn mint(to: Public, amount: SubstrateAmount) -> Result<(), Error<T, I>> {
       // update the balance
-      Self::increase_balance_internal(to, balance)?;
+      Self::increase_balance_internal(to, amount)?;
 
       // update the supply
-      let new_supply = Self::supply(balance.coin)
-        .checked_add(balance.amount.0)
-        .ok_or(Error::<T, I>::AmountOverflowed)?;
-      Supply::<T, I>::set(balance.coin, new_supply);
+      let new_supply = Self::supply().checked_add(amount).ok_or(Error::<T, I>::AmountOverflowed)?;
+      Supply::<T, I>::set(new_supply);
 
-      Self::deposit_event(Event::Mint { to, balance });
+      Self::deposit_event(Event::Mint { to, amount });
       Ok(())
     }
 
     /// Burn `balance` from the specified account.
-    fn burn_internal(from: Public, balance: Balance) -> Result<(), Error<T, I>> {
+    fn burn_internal(from: Public, amount: SubstrateAmount) -> Result<(), Error<T, I>> {
       // don't waste time if amount == 0
-      if balance.amount.0 == 0 {
+      if amount == 0 {
         return Ok(());
       }
 
       // update the balance
-      Self::decrease_balance_internal(from, balance)?;
+      Self::decrease_balance_internal(from, amount)?;
 
       // update the supply
-      let new_supply = Self::supply(balance.coin).checked_sub(balance.amount.0).unwrap();
-      Supply::<T, I>::set(balance.coin, new_supply);
+      let new_supply = Self::supply().checked_sub(amount).unwrap();
+      Supply::<T, I>::set(new_supply);
 
       Ok(())
     }
@@ -202,12 +147,12 @@ pub mod pallet {
     pub fn transfer_internal(
       from: Public,
       to: Public,
-      balance: Balance,
+      amount: SubstrateAmount,
     ) -> Result<(), Error<T, I>> {
       // update balances of accounts
-      Self::decrease_balance_internal(from, balance)?;
-      Self::increase_balance_internal(to, balance)?;
-      Self::deposit_event(Event::Transfer { from, to, balance });
+      Self::decrease_balance_internal(from, amount)?;
+      Self::increase_balance_internal(to, amount)?;
+      Self::deposit_event(Event::Transfer { from, to, amount });
       Ok(())
     }
   }
@@ -216,36 +161,19 @@ pub mod pallet {
   impl<T: Config<I>, I: 'static> Pallet<T, I> {
     #[pallet::call_index(0)]
     #[pallet::weight((0, DispatchClass::Normal))] // TODO
-    pub fn transfer(origin: OriginFor<T>, to: Public, balance: Balance) -> DispatchResult {
+    pub fn transfer(origin: OriginFor<T>, to: Public, amount: SubstrateAmount) -> DispatchResult {
       let from = ensure_signed(origin)?;
-      Self::transfer_internal(from, to, balance)?;
+      Self::transfer_internal(from, to, amount)?;
       Ok(())
     }
 
     /// Burn `balance` from the caller.
     #[pallet::call_index(1)]
     #[pallet::weight((0, DispatchClass::Normal))] // TODO
-    pub fn burn(origin: OriginFor<T>, balance: Balance) -> DispatchResult {
+    pub fn burn(origin: OriginFor<T>, amount: SubstrateAmount) -> DispatchResult {
       let from = ensure_signed(origin)?;
-      Self::burn_internal(from, balance)?;
-      Self::deposit_event(Event::Burn { from, balance });
-      Ok(())
-    }
-
-    /// Burn `balance` with `OutInstructionWithBalance` from the caller.
-    #[pallet::call_index(2)]
-    #[pallet::weight((0, DispatchClass::Normal))] // TODO
-    pub fn burn_with_instruction(
-      origin: OriginFor<T>,
-      instruction: OutInstructionWithBalance,
-    ) -> DispatchResult {
-      if TypeId::of::<I>() == TypeId::of::<LiquidityTokensInstance>() {
-        Err(Error::<T, I>::BurnWithInstructionNotAllowed)?;
-      }
-
-      let from = ensure_signed(origin)?;
-      Self::burn_internal(from, instruction.balance.into())?;
-      Self::deposit_event(Event::BurnWithInstruction { from, instruction });
+      Self::burn_internal(from, amount)?;
+      Self::deposit_event(Event::Burn { from, amount });
       Ok(())
     }
   }
@@ -268,8 +196,7 @@ pub mod pallet {
         return Ok(None);
       }
 
-      let balance = Balance { coin: Coin::Serai, amount: Amount(fee) };
-      match Self::transfer_internal(*who, FEE_ACCOUNT.into(), balance) {
+      match Self::transfer_internal(*who, FEE_ACCOUNT.into(), fee) {
         Err(_) => Err(InvalidTransaction::Payment)?,
         Ok(()) => Ok(Some(fee)),
       }
@@ -285,8 +212,7 @@ pub mod pallet {
     ) -> Result<(), TransactionValidityError> {
       if let Some(paid) = already_withdrawn {
         let refund_amount = paid.saturating_sub(corrected_fee);
-        let balance = Balance { coin: Coin::Serai, amount: Amount(refund_amount) };
-        Self::transfer_internal(FEE_ACCOUNT.into(), *who, balance)
+        Self::transfer_internal(FEE_ACCOUNT.into(), *who, refund_amount)
           .map_err(|_| TransactionValidityError::Invalid(InvalidTransaction::Payment))?;
       }
       Ok(())

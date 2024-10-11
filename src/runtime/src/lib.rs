@@ -189,7 +189,6 @@ impl transaction_payment::Config for Runtime {
 
 impl coins::Config for Runtime {
   type RuntimeEvent = RuntimeEvent;
-  type AllowMint = ValidatorSets;
 }
 
 impl validator_sets::Config for Runtime {

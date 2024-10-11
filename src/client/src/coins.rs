@@ -1,6 +1,6 @@
 use scale::Encode;
 
-use wikiblocks_abi::primitives::{WikiblocksAddress, Amount, Coin, Balance};
+use wikiblocks_abi::primitives::{Amount, Balance, Coin, SubstrateAmount, WikiblocksAddress};
 pub use wikiblocks_abi::coins::primitives;
 use primitives::OutInstructionWithBalance;
 
@@ -30,54 +30,25 @@ impl<'a> SeraiCoins<'a> {
       .await
   }
 
-  pub async fn burn_with_instruction_events(&self) -> Result<Vec<CoinsEvent>, SeraiError> {
-    self
-      .0
-      .events(|event| {
-        if let wikiblocks_abi::Event::Coins(event) = event {
-          if matches!(event, CoinsEvent::BurnWithInstruction { .. }) {
-            Some(event.clone())
-          } else {
-            None
-          }
-        } else {
-          None
-        }
-      })
-      .await
+  pub async fn coin_supply(&self, coin: Coin) -> Result<SubstrateAmount, SeraiError> {
+    self.0.storage(PALLET, "Supply", coin).await
   }
 
-  pub async fn coin_supply(&self, coin: Coin) -> Result<Amount, SeraiError> {
-    Ok(self.0.storage(PALLET, "Supply", coin).await?.unwrap_or(Amount(0)))
-  }
-
-  pub async fn coin_balance(
-    &self,
-    coin: Coin,
-    address: WikiblocksAddress,
-  ) -> Result<Amount, SeraiError> {
+  pub async fn balance(&self, address: WikiblocksAddress) -> Result<SubstrateAmount, SeraiError> {
     Ok(
       self
         .0
-        .storage(
-          PALLET,
-          "Balances",
-          (sp_core::hashing::blake2_128(&address.encode()), &address.0, coin),
-        )
+        .storage(PALLET, "Balances", (sp_core::hashing::blake2_128(&address.encode()), &address.0))
         .await?
-        .unwrap_or(Amount(0)),
+        .unwrap_or(0),
     )
   }
 
-  pub fn transfer(to: WikiblocksAddress, balance: Balance) -> wikiblocks_abi::Call {
-    wikiblocks_abi::Call::Coins(wikiblocks_abi::coins::Call::transfer { to, balance })
+  pub fn transfer(to: WikiblocksAddress, amount: SubstrateAmount) -> wikiblocks_abi::Call {
+    wikiblocks_abi::Call::Coins(wikiblocks_abi::coins::Call::transfer { to, amount })
   }
 
-  pub fn burn(balance: Balance) -> wikiblocks_abi::Call {
-    wikiblocks_abi::Call::Coins(wikiblocks_abi::coins::Call::burn { balance })
-  }
-
-  pub fn burn_with_instruction(instruction: OutInstructionWithBalance) -> wikiblocks_abi::Call {
-    wikiblocks_abi::Call::Coins(wikiblocks_abi::coins::Call::burn_with_instruction { instruction })
+  pub fn burn(amount: SubstrateAmount) -> wikiblocks_abi::Call {
+    wikiblocks_abi::Call::Coins(wikiblocks_abi::coins::Call::burn { amount })
   }
 }
