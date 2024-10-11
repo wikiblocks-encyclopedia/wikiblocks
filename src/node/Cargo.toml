@@ -1,9 +1,9 @@
 [package]
-name = "serai-node"
+name = "wikiblocks-node"
 version = "0.1.0"
 description = "Serai network node, built over Substrate"
 license = "AGPL-3.0-only"
-repository = "https://github.com/serai-dex/serai/tree/develop/substrate/node"
+repository = "https://github.com/akildemir/wikiblocks/tree/develop/substrate/node"
 authors = ["Luke Parker <lukeparker5132@gmail.com>"]
 edition = "2021"
 publish = false
@@ -17,7 +17,7 @@ rustdoc-args = ["--cfg", "docsrs"]
 workspace = true
 
 [[bin]]
-name = "serai-node"
+name = "wikiblocks-node"
 
 [dependencies]
 rand_core = "0.6"
@@ -40,7 +40,7 @@ sp-consensus-babe = { git = "https://github.com/serai-dex/substrate" }
 
 frame-benchmarking = { git = "https://github.com/serai-dex/substrate" }
 
-serai-runtime = { path = "../runtime", features = ["std"] }
+wikiblocks-runtime = { path = "../runtime", features = ["std"] }
 
 clap = { version = "4", features = ["derive"] }
 
@@ -82,5 +82,5 @@ default = []
 runtime-benchmarks = [
   "frame-benchmarking/runtime-benchmarks",
 
-  "serai-runtime/runtime-benchmarks",
+  "wikiblocks-runtime/runtime-benchmarks",
 ]

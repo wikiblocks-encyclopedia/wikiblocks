@@ -97,7 +97,7 @@ pub mod opaque {
 
 #[sp_version::runtime_version]
 pub const VERSION: RuntimeVersion = RuntimeVersion {
-  spec_name: create_runtime_str!("serai"),
+  spec_name: create_runtime_str!("wikiblocks"),
   impl_name: create_runtime_str!("core"),
   spec_version: 1,
   impl_version: 1,

@@ -6171,217 +6171,9 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "cd0b0ec5f1c1ca621c432a25813d8d60c88abe6d3e08a3eb9cf37d97a0fe3d73"
 
 [[package]]
-name = "serai-abi"
-version = "0.1.0"
-dependencies = [
- "borsh",
- "frame-support",
- "parity-scale-codec",
- "scale-info",
- "serai-coins-primitives",
- "serai-primitives",
- "serai-validator-sets-primitives",
- "serde",
- "sp-consensus-babe",
- "sp-consensus-grandpa",
- "sp-core",
- "sp-runtime",
-]
-
-[[package]]
-name = "serai-client"
-version = "0.1.0"
-dependencies = [
- "async-lock",
- "blake2",
- "frame-system",
- "hex",
- "multiaddr",
- "parity-scale-codec",
- "rand_core",
- "serai-abi",
- "serde",
- "serde_json",
- "simple-request",
- "sp-core",
- "sp-runtime",
- "thiserror",
- "tokio",
- "zeroize",
-]
-
-[[package]]
-name = "serai-coins-pallet"
-version = "0.1.0"
-dependencies = [
- "frame-support",
- "frame-system",
- "pallet-transaction-payment",
- "parity-scale-codec",
- "scale-info",
- "serai-coins-primitives",
- "serai-primitives",
- "sp-core",
- "sp-runtime",
- "sp-std",
-]
-
-[[package]]
-name = "serai-coins-primitives"
-version = "0.1.0"
-dependencies = [
- "borsh",
- "parity-scale-codec",
- "scale-info",
- "serai-primitives",
- "serde",
- "sp-runtime",
- "zeroize",
-]
-
-[[package]]
 name = "serai-env"
 version = "0.1.0"
 source = "git+https://github.com/serai-dex/serai#599b2dec8fada40c9f213fbc04d81871e24aff46"
-
-[[package]]
-name = "serai-node"
-version = "0.1.0"
-dependencies = [
- "clap",
- "frame-benchmarking",
- "futures-util",
- "hex",
- "jsonrpsee",
- "libp2p",
- "log",
- "pallet-transaction-payment-rpc",
- "rand_core",
- "sc-authority-discovery",
- "sc-basic-authorship",
- "sc-cli",
- "sc-client-api",
- "sc-consensus",
- "sc-consensus-babe",
- "sc-consensus-grandpa",
- "sc-executor",
- "sc-network",
- "sc-network-common",
- "sc-offchain",
- "sc-rpc-api",
- "sc-service",
- "sc-telemetry",
- "sc-transaction-pool",
- "sc-transaction-pool-api",
- "schnorrkel",
- "serai-env",
- "serai-runtime",
- "sp-api",
- "sp-block-builder",
- "sp-blockchain",
- "sp-consensus-babe",
- "sp-core",
- "sp-io",
- "sp-keystore",
- "sp-timestamp",
- "substrate-build-script-utils",
- "substrate-frame-rpc-system",
- "tokio",
- "zeroize",
-]
-
-[[package]]
-name = "serai-primitives"
-version = "0.1.0"
-dependencies = [
- "borsh",
- "frame-support",
- "parity-scale-codec",
- "rand_core",
- "scale-info",
- "serde",
- "sp-application-crypto",
- "sp-core",
- "sp-io",
- "sp-runtime",
- "sp-std",
- "zeroize",
-]
-
-[[package]]
-name = "serai-runtime"
-version = "0.1.0"
-dependencies = [
- "frame-benchmarking",
- "frame-executive",
- "frame-support",
- "frame-system",
- "frame-system-rpc-runtime-api",
- "hashbrown 0.14.5",
- "pallet-authorship",
- "pallet-babe",
- "pallet-grandpa",
- "pallet-timestamp",
- "pallet-transaction-payment",
- "pallet-transaction-payment-rpc-runtime-api",
- "parity-scale-codec",
- "scale-info",
- "serai-abi",
- "serai-coins-pallet",
- "serai-primitives",
- "serai-validator-sets-pallet",
- "sp-api",
- "sp-authority-discovery",
- "sp-block-builder",
- "sp-consensus-babe",
- "sp-consensus-grandpa",
- "sp-core",
- "sp-inherents",
- "sp-offchain",
- "sp-runtime",
- "sp-session",
- "sp-std",
- "sp-transaction-pool",
- "sp-version",
- "substrate-wasm-builder",
-]
-
-[[package]]
-name = "serai-validator-sets-pallet"
-version = "0.1.0"
-dependencies = [
- "frame-support",
- "frame-system",
- "hashbrown 0.14.5",
- "pallet-babe",
- "pallet-grandpa",
- "parity-scale-codec",
- "scale-info",
- "serai-coins-pallet",
- "serai-primitives",
- "serai-validator-sets-primitives",
- "sp-application-crypto",
- "sp-core",
- "sp-io",
- "sp-runtime",
- "sp-session",
- "sp-staking",
- "sp-std",
-]
-
-[[package]]
-name = "serai-validator-sets-primitives"
-version = "0.1.0"
-dependencies = [
- "borsh",
- "parity-scale-codec",
- "scale-info",
- "serai-primitives",
- "serde",
- "sp-core",
- "sp-std",
- "zeroize",
-]
 
 [[package]]
 name = "serde"
@@ -8637,6 +8429,214 @@ name = "widestring"
 version = "1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7219d36b6eac893fa81e84ebe06485e7dcbb616177469b142df14f1f4deb1311"
+
+[[package]]
+name = "wikiblocks-abi"
+version = "0.1.0"
+dependencies = [
+ "borsh",
+ "frame-support",
+ "parity-scale-codec",
+ "scale-info",
+ "serde",
+ "sp-consensus-babe",
+ "sp-consensus-grandpa",
+ "sp-core",
+ "sp-runtime",
+ "wikiblocks-coins-primitives",
+ "wikiblocks-primitives",
+ "wikiblocks-validator-sets-primitives",
+]
+
+[[package]]
+name = "wikiblocks-client"
+version = "0.1.0"
+dependencies = [
+ "async-lock",
+ "blake2",
+ "frame-system",
+ "hex",
+ "multiaddr",
+ "parity-scale-codec",
+ "rand_core",
+ "serde",
+ "serde_json",
+ "simple-request",
+ "sp-core",
+ "sp-runtime",
+ "thiserror",
+ "tokio",
+ "wikiblocks-abi",
+ "zeroize",
+]
+
+[[package]]
+name = "wikiblocks-coins-pallet"
+version = "0.1.0"
+dependencies = [
+ "frame-support",
+ "frame-system",
+ "pallet-transaction-payment",
+ "parity-scale-codec",
+ "scale-info",
+ "sp-core",
+ "sp-runtime",
+ "sp-std",
+ "wikiblocks-coins-primitives",
+ "wikiblocks-primitives",
+]
+
+[[package]]
+name = "wikiblocks-coins-primitives"
+version = "0.1.0"
+dependencies = [
+ "borsh",
+ "parity-scale-codec",
+ "scale-info",
+ "serde",
+ "sp-runtime",
+ "wikiblocks-primitives",
+ "zeroize",
+]
+
+[[package]]
+name = "wikiblocks-node"
+version = "0.1.0"
+dependencies = [
+ "clap",
+ "frame-benchmarking",
+ "futures-util",
+ "hex",
+ "jsonrpsee",
+ "libp2p",
+ "log",
+ "pallet-transaction-payment-rpc",
+ "rand_core",
+ "sc-authority-discovery",
+ "sc-basic-authorship",
+ "sc-cli",
+ "sc-client-api",
+ "sc-consensus",
+ "sc-consensus-babe",
+ "sc-consensus-grandpa",
+ "sc-executor",
+ "sc-network",
+ "sc-network-common",
+ "sc-offchain",
+ "sc-rpc-api",
+ "sc-service",
+ "sc-telemetry",
+ "sc-transaction-pool",
+ "sc-transaction-pool-api",
+ "schnorrkel",
+ "serai-env",
+ "sp-api",
+ "sp-block-builder",
+ "sp-blockchain",
+ "sp-consensus-babe",
+ "sp-core",
+ "sp-io",
+ "sp-keystore",
+ "sp-timestamp",
+ "substrate-build-script-utils",
+ "substrate-frame-rpc-system",
+ "tokio",
+ "wikiblocks-runtime",
+ "zeroize",
+]
+
+[[package]]
+name = "wikiblocks-primitives"
+version = "0.1.0"
+dependencies = [
+ "borsh",
+ "frame-support",
+ "parity-scale-codec",
+ "rand_core",
+ "scale-info",
+ "serde",
+ "sp-application-crypto",
+ "sp-core",
+ "sp-io",
+ "sp-runtime",
+ "sp-std",
+ "zeroize",
+]
+
+[[package]]
+name = "wikiblocks-runtime"
+version = "0.1.0"
+dependencies = [
+ "frame-benchmarking",
+ "frame-executive",
+ "frame-support",
+ "frame-system",
+ "frame-system-rpc-runtime-api",
+ "hashbrown 0.14.5",
+ "pallet-authorship",
+ "pallet-babe",
+ "pallet-grandpa",
+ "pallet-timestamp",
+ "pallet-transaction-payment",
+ "pallet-transaction-payment-rpc-runtime-api",
+ "parity-scale-codec",
+ "scale-info",
+ "sp-api",
+ "sp-authority-discovery",
+ "sp-block-builder",
+ "sp-consensus-babe",
+ "sp-consensus-grandpa",
+ "sp-core",
+ "sp-inherents",
+ "sp-offchain",
+ "sp-runtime",
+ "sp-session",
+ "sp-std",
+ "sp-transaction-pool",
+ "sp-version",
+ "substrate-wasm-builder",
+ "wikiblocks-abi",
+ "wikiblocks-coins-pallet",
+ "wikiblocks-primitives",
+ "wikiblocks-validator-sets-pallet",
+]
+
+[[package]]
+name = "wikiblocks-validator-sets-pallet"
+version = "0.1.0"
+dependencies = [
+ "frame-support",
+ "frame-system",
+ "hashbrown 0.14.5",
+ "pallet-babe",
+ "pallet-grandpa",
+ "parity-scale-codec",
+ "scale-info",
+ "sp-application-crypto",
+ "sp-core",
+ "sp-io",
+ "sp-runtime",
+ "sp-session",
+ "sp-staking",
+ "sp-std",
+ "wikiblocks-coins-pallet",
+ "wikiblocks-primitives",
+ "wikiblocks-validator-sets-primitives",
+]
+
+[[package]]
+name = "wikiblocks-validator-sets-primitives"
+version = "0.1.0"
+dependencies = [
+ "borsh",
+ "parity-scale-codec",
+ "scale-info",
+ "serde",
+ "sp-core",
+ "sp-std",
+ "wikiblocks-primitives",
+ "zeroize",
+]
 
 [[package]]
 name = "winapi"

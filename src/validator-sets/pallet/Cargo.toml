@@ -1,9 +1,9 @@
 [package]
-name = "serai-validator-sets-pallet"
+name = "wikiblocks-validator-sets-pallet"
 version = "0.1.0"
 description = "Validator sets pallet"
 license = "AGPL-3.0-only"
-repository = "https://github.com/serai-dex/serai/tree/develop/substrate/validator-sets/pallet"
+repository = "https://github.com/akildemir/wikiblocks/tree/develop/substrate/validator-sets/pallet"
 authors = ["Luke Parker <lukeparker5132@gmail.com>"]
 edition = "2021"
 rust-version = "1.74"
@@ -38,10 +38,10 @@ frame-support = { git = "https://github.com/serai-dex/substrate", default-featur
 pallet-babe = { git = "https://github.com/serai-dex/substrate", default-features = false }
 pallet-grandpa = { git = "https://github.com/serai-dex/substrate", default-features = false }
 
-serai-primitives = { path = "../../primitives", default-features = false }
-validator-sets-primitives = { package = "serai-validator-sets-primitives", path = "../primitives", default-features = false }
+wikiblocks-primitives = { path = "../../primitives", default-features = false }
+validator-sets-primitives = { package = "wikiblocks-validator-sets-primitives", path = "../primitives", default-features = false }
 
-coins-pallet = { package = "serai-coins-pallet", path = "../../coins/pallet", default-features = false }
+coins-pallet = { package = "wikiblocks-coins-pallet", path = "../../coins/pallet", default-features = false }
 
 [features]
 std = [
@@ -62,7 +62,7 @@ std = [
   "pallet-babe/std",
   "pallet-grandpa/std",
 
-  "serai-primitives/std",
+  "wikiblocks-primitives/std",
   "validator-sets-primitives/std",
 
   "coins-pallet/std",

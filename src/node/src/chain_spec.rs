@@ -18,7 +18,7 @@ fn account_from_name(name: &'static str) -> PublicKey {
 
 fn wasm_binary() -> Vec<u8> {
   // TODO: Accept a config of runtime path
-  const WASM_PATH: &str = "/runtime/serai.wasm";
+  const WASM_PATH: &str = "/runtime/wikiblocks.wasm";
   if let Ok(binary) = std::fs::read(WASM_PATH) {
     log::info!("using {WASM_PATH}");
     return binary;
@@ -160,7 +160,7 @@ pub fn development_config() -> ChainSpec {
     // Telemetry
     None,
     // Protocol ID
-    Some("serai-devnet"),
+    Some("wikiblocks-devnet"),
     // Fork ID
     None,
     // Properties
@@ -198,7 +198,7 @@ pub fn local_config() -> ChainSpec {
     // Telemetry
     None,
     // Protocol ID
-    Some("serai-local"),
+    Some("wikiblocks-local"),
     // Fork ID
     None,
     // Properties
@@ -226,7 +226,7 @@ pub fn testnet_config() -> ChainSpec {
     // Telemetry
     None,
     // Protocol ID
-    Some("serai-testnet-2"),
+    Some("wikiblocks-testnet-2"),
     // Fork ID
     None,
     // Properties

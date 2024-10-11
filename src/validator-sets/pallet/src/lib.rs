@@ -109,7 +109,7 @@ pub mod pallet {
   impl<T: Config> Pallet<T> {
     pub fn latest_decided_session(network: NetworkId) -> Option<Session> {
       let session = Self::session(network);
-      // we already decided about the next session for serai.
+      // we already decided about the next session for wikiblocks.
       if network == NetworkId::Serai {
         return session.map(|s| Session(s.0 + 1));
       }
@@ -675,7 +675,7 @@ pub mod pallet {
     // TODO: This is called retire_set, yet just starts retiring the set
     // Update the nomenclature within this function
     pub fn retire_set(set: ValidatorSet) {
-      // emit the event for serai network
+      // emit the event for wikiblocks network
       Self::deposit_event(Event::SetRetired { set });
 
       // We're retiring this set because the set after it accepted the handover
@@ -699,13 +699,13 @@ pub mod pallet {
     }
 
     fn rotate_session() {
-      // next serai validators that is in the queue.
+      // next wikiblocks validators that is in the queue.
       let now_validators = Participants::<T>::get(NetworkId::Serai)
         .expect("no Serai participants upon rotate_session");
       let prior_serai_session = Self::session(NetworkId::Serai).unwrap();
 
       // TODO: T::SessionHandler::on_before_session_ending() was here.
-      // end the current serai session.
+      // end the current wikiblocks session.
       Self::retire_set(ValidatorSet { network: NetworkId::Serai, session: prior_serai_session });
 
       // make a new session and get the next validator set.

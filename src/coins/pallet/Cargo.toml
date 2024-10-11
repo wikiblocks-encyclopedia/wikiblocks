@@ -1,9 +1,9 @@
 [package]
-name = "serai-coins-pallet"
+name = "wikiblocks-coins-pallet"
 version = "0.1.0"
 description = "Coins pallet for Serai"
 license = "AGPL-3.0-only"
-repository = "https://github.com/serai-dex/serai/tree/develop/substrate/coins/pallet"
+repository = "https://github.com/akildemir/wikiblocks/tree/develop/substrate/coins/pallet"
 authors = ["Akil Demir <akildemir72@gmail.com>"]
 edition = "2021"
 rust-version = "1.74"
@@ -31,8 +31,8 @@ sp-runtime = { git = "https://github.com/serai-dex/substrate", default-features 
 
 pallet-transaction-payment = { git = "https://github.com/serai-dex/substrate", default-features = false }
 
-serai-primitives = { path = "../../primitives", default-features = false, features = ["serde"] }
-coins-primitives = { package = "serai-coins-primitives", path = "../primitives", default-features = false }
+wikiblocks-primitives = { path = "../../primitives", default-features = false, features = ["serde"] }
+coins-primitives = { package = "wikiblocks-coins-primitives", path = "../primitives", default-features = false }
 
 [features]
 std = [
@@ -45,7 +45,7 @@ std = [
 
   "pallet-transaction-payment/std",
 
-  "serai-primitives/std",
+  "wikiblocks-primitives/std",
   "coins-primitives/std",
 ]
 

@@ -40,11 +40,11 @@ allow = [
 exceptions = [
   { allow = ["AGPL-3.0"], name = "serai-env" },
 
-  { allow = ["AGPL-3.0"], name = "serai-coins-pallet" },
-  { allow = ["AGPL-3.0"], name = "serai-validator-sets-pallet" },
+  { allow = ["AGPL-3.0"], name = "wikiblocks-coins-pallet" },
+  { allow = ["AGPL-3.0"], name = "wikiblocks-validator-sets-pallet" },
 
-  { allow = ["AGPL-3.0"], name = "serai-runtime" },
-  { allow = ["AGPL-3.0"], name = "serai-node" },
+  { allow = ["AGPL-3.0"], name = "wikiblocks-runtime" },
+  { allow = ["AGPL-3.0"], name = "wikiblocks-node" },
 ]
 
 [[licenses.clarify]]
