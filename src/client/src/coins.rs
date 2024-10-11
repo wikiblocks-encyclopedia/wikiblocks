@@ -1,6 +1,6 @@
 use scale::Encode;
 
-use wikiblocks_abi::primitives::{SeraiAddress, Amount, Coin, Balance};
+use wikiblocks_abi::primitives::{WikiblocksAddress, Amount, Coin, Balance};
 pub use wikiblocks_abi::coins::primitives;
 use primitives::OutInstructionWithBalance;
 
@@ -54,7 +54,7 @@ impl<'a> SeraiCoins<'a> {
   pub async fn coin_balance(
     &self,
     coin: Coin,
-    address: SeraiAddress,
+    address: WikiblocksAddress,
   ) -> Result<Amount, SeraiError> {
     Ok(
       self
@@ -69,7 +69,7 @@ impl<'a> SeraiCoins<'a> {
     )
   }
 
-  pub fn transfer(to: SeraiAddress, balance: Balance) -> wikiblocks_abi::Call {
+  pub fn transfer(to: WikiblocksAddress, balance: Balance) -> wikiblocks_abi::Call {
     wikiblocks_abi::Call::Coins(wikiblocks_abi::coins::Call::transfer { to, balance })
   }
 

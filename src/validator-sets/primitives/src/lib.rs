@@ -15,8 +15,6 @@ use sp_core::sr25519::Public;
 #[cfg(not(feature = "std"))]
 use sp_std::vec::Vec;
 
-use wikiblocks_primitives::NetworkId;
-
 /// The maximum amount of key shares per set.
 pub const MAX_KEY_SHARES_PER_SET: u32 = 150;
 
@@ -28,16 +26,6 @@ pub const MAX_KEY_SHARES_PER_SET: u32 = 150;
 #[cfg_attr(feature = "borsh", derive(BorshSerialize, BorshDeserialize))]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct Session(pub u32);
-
-/// The type used to identify a specific validator set during a specific session.
-#[derive(Clone, Copy, PartialEq, Eq, Hash, Debug, Encode, Decode, TypeInfo, MaxEncodedLen)]
-#[cfg_attr(feature = "std", derive(Zeroize))]
-#[cfg_attr(feature = "borsh", derive(BorshSerialize, BorshDeserialize))]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-pub struct ValidatorSet {
-  pub session: Session,
-  pub network: NetworkId, // TODO: we don't need a ValidatorSet type because no NetworkId.
-}
 
 /// For a set of validators whose key shares may exceed the maximum, reduce until they equal the
 /// maximum.

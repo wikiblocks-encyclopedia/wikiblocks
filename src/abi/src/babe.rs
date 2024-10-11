@@ -1,11 +1,11 @@
 use sp_consensus_babe::EquivocationProof;
 
-use wikiblocks_primitives::{Header, SeraiAddress};
+use wikiblocks_primitives::{Header, WikiblocksAddress};
 
 #[derive(Clone, PartialEq, Eq, Debug, scale::Encode, scale::Decode, scale_info::TypeInfo)]
 pub struct ReportEquivocation {
   pub equivocation_proof: alloc::boxed::Box<EquivocationProof<Header>>,
-  pub key_owner_proof: SeraiAddress,
+  pub key_owner_proof: WikiblocksAddress,
 }
 
 // We could define a Babe Config here and use the literal pallet_babe::Call

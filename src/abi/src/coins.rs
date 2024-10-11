@@ -1,14 +1,13 @@
-use wikiblocks_primitives::{Balance, SeraiAddress};
-
 pub use wikiblocks_coins_primitives as primitives;
-use primitives::OutInstructionWithBalance;
+
+use wikiblocks_primitives::WikiblocksAddress;
 
 #[derive(Clone, PartialEq, Eq, Debug, scale::Encode, scale::Decode, scale_info::TypeInfo)]
 #[cfg_attr(feature = "borsh", derive(borsh::BorshSerialize, borsh::BorshDeserialize))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
 #[cfg_attr(all(feature = "std", feature = "serde"), derive(serde::Deserialize))]
 pub enum Call {
-  transfer { to: SeraiAddress, balance: Balance },
+  transfer { to: WikiblocksAddress, balance: Balance },
   burn { balance: Balance },
   burn_with_instruction { instruction: OutInstructionWithBalance },
 }
@@ -18,8 +17,8 @@ pub enum Call {
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
 #[cfg_attr(all(feature = "std", feature = "serde"), derive(serde::Deserialize))]
 pub enum Event {
-  Mint { to: SeraiAddress, balance: Balance },
-  Burn { from: SeraiAddress, balance: Balance },
-  BurnWithInstruction { from: SeraiAddress, instruction: OutInstructionWithBalance },
-  Transfer { from: SeraiAddress, to: SeraiAddress, balance: Balance },
+  Mint { to: WikiblocksAddress, balance: Balance },
+  Burn { from: WikiblocksAddress, balance: Balance },
+  BurnWithInstruction { from: WikiblocksAddress, instruction: OutInstructionWithBalance },
+  Transfer { from: WikiblocksAddress, to: WikiblocksAddress, balance: Balance },
 }

@@ -15,7 +15,7 @@ pub use wikiblocks_abi as abi;
 pub use abi::{primitives, Transaction};
 use abi::*;
 
-pub use primitives::{SeraiAddress, Signature, Amount};
+pub use primitives::{WikiblocksAddress, Signature, Amount};
 use primitives::{Header, NetworkId};
 
 pub mod coins;
@@ -279,7 +279,7 @@ impl Serai {
     ))
   }
 
-  pub async fn nonce(&self, address: &SeraiAddress) -> Result<u32, SeraiError> {
+  pub async fn nonce(&self, address: &WikiblocksAddress) -> Result<u32, SeraiError> {
     self
       .0
       .rpc()

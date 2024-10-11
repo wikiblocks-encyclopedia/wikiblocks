@@ -31,7 +31,7 @@ pub enum Call {
 // TODO: Remove this
 #[derive(Clone, PartialEq, Eq, Debug, scale::Encode, scale::Decode, scale_info::TypeInfo)]
 pub enum TransactionPaymentEvent {
-  TransactionFeePaid { who: wikiblocks_primitives::SeraiAddress, actual_fee: u64, tip: u64 },
+  TransactionFeePaid { who: wikiblocks_primitives::WikiblocksAddress, actual_fee: u64, tip: u64 },
 }
 
 #[derive(Clone, PartialEq, Eq, Debug, scale::Encode, scale::Decode, scale_info::TypeInfo)]

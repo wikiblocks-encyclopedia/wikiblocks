@@ -41,10 +41,7 @@ use sp_runtime::{
 };
 
 #[allow(unused_imports)]
-use primitives::{
-  AccountLookup, Coin, NetworkId, PublicKey, SubstrateAmount, BLOCK_SIZE, DAYS, EXTERNAL_NETWORKS,
-  FAST_EPOCH_DURATION, HOURS, MEDIAN_PRICE_WINDOW_LENGTH, MINUTES, TARGET_BLOCK_TIME,
-};
+use primitives::{AccountLookup, PublicKey, SubstrateAmount, BLOCK_SIZE, DAYS, TARGET_BLOCK_TIME};
 
 use support::{
   construct_runtime, parameter_types,

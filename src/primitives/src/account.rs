@@ -57,33 +57,33 @@ pub fn borsh_deserialize_signature<R: borsh::io::Read>(
 #[cfg_attr(feature = "std", derive(Zeroize))]
 #[cfg_attr(feature = "borsh", derive(BorshSerialize, BorshDeserialize))]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-pub struct SeraiAddress(pub [u8; 32]);
-impl SeraiAddress {
-  pub fn new(key: [u8; 32]) -> SeraiAddress {
-    SeraiAddress(key)
+pub struct WikiblocksAddress(pub [u8; 32]);
+impl WikiblocksAddress {
+  pub fn new(key: [u8; 32]) -> WikiblocksAddress {
+    WikiblocksAddress(key)
   }
 }
 
-impl From<[u8; 32]> for SeraiAddress {
-  fn from(key: [u8; 32]) -> SeraiAddress {
-    SeraiAddress(key)
+impl From<[u8; 32]> for WikiblocksAddress {
+  fn from(key: [u8; 32]) -> WikiblocksAddress {
+    WikiblocksAddress(key)
   }
 }
 
-impl From<PublicKey> for SeraiAddress {
-  fn from(key: PublicKey) -> SeraiAddress {
-    SeraiAddress(key.0)
+impl From<PublicKey> for WikiblocksAddress {
+  fn from(key: PublicKey) -> WikiblocksAddress {
+    WikiblocksAddress(key.0)
   }
 }
 
-impl From<SeraiAddress> for PublicKey {
-  fn from(address: SeraiAddress) -> PublicKey {
+impl From<WikiblocksAddress> for PublicKey {
+  fn from(address: WikiblocksAddress) -> PublicKey {
     PublicKey::from_raw(address.0)
   }
 }
 
 #[cfg(feature = "std")]
-impl std::fmt::Display for SeraiAddress {
+impl std::fmt::Display for WikiblocksAddress {
   fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
     // TODO: Bech32
     write!(f, "{:?}", self.0)
@@ -97,24 +97,24 @@ pub fn insecure_pair_from_name(name: &str) -> Pair {
 
 pub struct AccountLookup;
 impl Lookup for AccountLookup {
-  type Source = SeraiAddress;
+  type Source = WikiblocksAddress;
   type Target = PublicKey;
-  fn lookup(&self, source: SeraiAddress) -> Result<PublicKey, LookupError> {
+  fn lookup(&self, source: WikiblocksAddress) -> Result<PublicKey, LookupError> {
     Ok(PublicKey::from_raw(source.0))
   }
 }
 impl StaticLookup for AccountLookup {
-  type Source = SeraiAddress;
+  type Source = WikiblocksAddress;
   type Target = PublicKey;
-  fn lookup(source: SeraiAddress) -> Result<PublicKey, LookupError> {
+  fn lookup(source: WikiblocksAddress) -> Result<PublicKey, LookupError> {
     Ok(source.into())
   }
-  fn unlookup(source: PublicKey) -> SeraiAddress {
+  fn unlookup(source: PublicKey) -> WikiblocksAddress {
     source.into()
   }
 }
 
-pub const fn system_address(pallet: &'static [u8]) -> SeraiAddress {
+pub const fn system_address(pallet: &'static [u8]) -> WikiblocksAddress {
   let mut address = [0; 32];
   let mut set = false;
   // Implement a while loop since we can't use a for loop
@@ -129,5 +129,5 @@ pub const fn system_address(pallet: &'static [u8]) -> SeraiAddress {
   // Make sure this address isn't the identity point
   // Doesn't do address != [0; 32] since that's not const
   assert!(set, "address is the identity point");
-  SeraiAddress(address)
+  WikiblocksAddress(address)
 }

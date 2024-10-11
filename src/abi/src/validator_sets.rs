@@ -22,7 +22,7 @@ pub enum Event {
   },
   ParticipantRemoved {
     set: ValidatorSet,
-    removed: SeraiAddress,
+    removed: WikiblocksAddress,
   },
   AcceptedHandover {
     set: ValidatorSet,
@@ -31,18 +31,18 @@ pub enum Event {
     set: ValidatorSet,
   },
   AllocationIncreased {
-    validator: SeraiAddress,
+    validator: WikiblocksAddress,
     network: NetworkId,
     amount: Amount,
   },
   AllocationDecreased {
-    validator: SeraiAddress,
+    validator: WikiblocksAddress,
     network: NetworkId,
     amount: Amount,
     delayed_until: Option<Session>,
   },
   DeallocationClaimed {
-    validator: SeraiAddress,
+    validator: WikiblocksAddress,
     network: NetworkId,
     session: Session,
   },

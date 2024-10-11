@@ -3,7 +3,7 @@ use scale::Encode;
 use sp_core::sr25519::{Public, Signature};
 use sp_runtime::traits::Verify;
 
-use wikiblocks_primitives::SeraiAddress;
+use wikiblocks_primitives::WikiblocksAddress;
 
 use frame_support::dispatch::GetDispatchInfo;
 
@@ -24,8 +24,8 @@ impl<
 }
 
 type TransactionEncodeAs<'a, Extra> =
-  (&'a crate::Call, &'a Option<(SeraiAddress, Signature, Extra)>);
-type TransactionDecodeAs<Extra> = (crate::Call, Option<(SeraiAddress, Signature, Extra)>);
+  (&'a crate::Call, &'a Option<(WikiblocksAddress, Signature, Extra)>);
+type TransactionDecodeAs<Extra> = (crate::Call, Option<(WikiblocksAddress, Signature, Extra)>);
 
 // We use our own Transaction struct, over UncheckedExtrinsic, for more control, a bit more
 // simplicity, and in order to be immune to https://github.com/paritytech/polkadot-sdk/issues/2947
@@ -37,13 +37,13 @@ pub struct Transaction<
 > {
   call: crate::Call,
   mapped_call: Call,
-  signature: Option<(SeraiAddress, Signature, Extra)>,
+  signature: Option<(WikiblocksAddress, Signature, Extra)>,
 }
 
 impl<Call: 'static + TransactionMember + From<crate::Call>, Extra: 'static + TransactionMember>
   Transaction<Call, Extra>
 {
-  pub fn new(call: crate::Call, signature: Option<(SeraiAddress, Signature, Extra)>) -> Self {
+  pub fn new(call: crate::Call, signature: Option<(WikiblocksAddress, Signature, Extra)>) -> Self {
     Self { call: call.clone(), mapped_call: call.into(), signature }
   }
 
@@ -117,7 +117,7 @@ impl<
   > sp_runtime::traits::Extrinsic for Transaction<Call, Extra>
 {
   type Call = Call;
-  type SignaturePayload = (SeraiAddress, Signature, Extra);
+  type SignaturePayload = (WikiblocksAddress, Signature, Extra);
   fn is_signed(&self) -> Option<bool> {
     Some(self.signature.is_some())
   }
