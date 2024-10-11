@@ -19,7 +19,7 @@ use frame_support::{
   BoundedVec, WeakBoundedVec, StoragePrefixedMap,
 };
 
-use serai_primitives::*;
+use wikiblocks_primitives::*;
 pub use validator_sets_primitives as primitives;
 use primitives::*;
 

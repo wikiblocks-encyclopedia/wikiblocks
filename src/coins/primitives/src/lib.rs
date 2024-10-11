@@ -13,7 +13,7 @@ use serde::{Serialize, Deserialize};
 use scale::{Encode, Decode, MaxEncodedLen};
 use scale_info::TypeInfo;
 
-use serai_primitives::{system_address, Data, ExternalAddress, ExternalBalance, SeraiAddress};
+use wikiblocks_primitives::{system_address, Data, ExternalAddress, ExternalBalance, SeraiAddress};
 
 pub const FEE_ACCOUNT: SeraiAddress = system_address(b"Coins-fees");
 

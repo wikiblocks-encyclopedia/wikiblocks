@@ -1,6 +1,6 @@
 use sp_consensus_babe::EquivocationProof;
 
-use serai_primitives::{Header, SeraiAddress};
+use wikiblocks_primitives::{Header, SeraiAddress};
 
 #[derive(Clone, PartialEq, Eq, Debug, scale::Encode, scale::Decode, scale_info::TypeInfo)]
 pub struct ReportEquivocation {

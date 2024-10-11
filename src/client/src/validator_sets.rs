@@ -2,15 +2,15 @@ use scale::Encode;
 
 use sp_core::sr25519::Public;
 
-use serai_abi::primitives::Amount;
-pub use serai_abi::validator_sets::primitives;
+use wikiblocks_abi::primitives::Amount;
+pub use wikiblocks_abi::validator_sets::primitives;
 use primitives::Session;
 
 use crate::{primitives::NetworkId, TemporalSerai, SeraiError};
 
 const PALLET: &str = "ValidatorSets";
 
-pub type ValidatorSetsEvent = serai_abi::validator_sets::Event;
+pub type ValidatorSetsEvent = wikiblocks_abi::validator_sets::Event;
 
 #[derive(Clone, Copy)]
 pub struct SeraiValidatorSets<'a>(pub(crate) &'a TemporalSerai<'a>);
@@ -19,7 +19,7 @@ impl<'a> SeraiValidatorSets<'a> {
     self
       .0
       .events(|event| {
-        if let serai_abi::Event::ValidatorSets(event) = event {
+        if let wikiblocks_abi::Event::ValidatorSets(event) = event {
           if matches!(event, ValidatorSetsEvent::NewSet { .. }) {
             Some(event.clone())
           } else {
@@ -36,7 +36,7 @@ impl<'a> SeraiValidatorSets<'a> {
     self
       .0
       .events(|event| {
-        if let serai_abi::Event::ValidatorSets(event) = event {
+        if let wikiblocks_abi::Event::ValidatorSets(event) = event {
           if matches!(event, ValidatorSetsEvent::ParticipantRemoved { .. }) {
             Some(event.clone())
           } else {
@@ -53,7 +53,7 @@ impl<'a> SeraiValidatorSets<'a> {
     self
       .0
       .events(|event| {
-        if let serai_abi::Event::ValidatorSets(event) = event {
+        if let wikiblocks_abi::Event::ValidatorSets(event) = event {
           if matches!(event, ValidatorSetsEvent::SetRetired { .. }) {
             Some(event.clone())
           } else {
@@ -137,11 +137,17 @@ impl<'a> SeraiValidatorSets<'a> {
     self.0.storage(PALLET, "SessionBeginBlock", (network, session)).await
   }
 
-  pub fn allocate(network: NetworkId, amount: Amount) -> serai_abi::Call {
-    serai_abi::Call::ValidatorSets(serai_abi::validator_sets::Call::allocate { network, amount })
+  pub fn allocate(network: NetworkId, amount: Amount) -> wikiblocks_abi::Call {
+    wikiblocks_abi::Call::ValidatorSets(wikiblocks_abi::validator_sets::Call::allocate {
+      network,
+      amount,
+    })
   }
 
-  pub fn deallocate(network: NetworkId, amount: Amount) -> serai_abi::Call {
-    serai_abi::Call::ValidatorSets(serai_abi::validator_sets::Call::deallocate { network, amount })
+  pub fn deallocate(network: NetworkId, amount: Amount) -> wikiblocks_abi::Call {
+    wikiblocks_abi::Call::ValidatorSets(wikiblocks_abi::validator_sets::Call::deallocate {
+      network,
+      amount,
+    })
   }
 }

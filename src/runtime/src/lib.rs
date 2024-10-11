@@ -10,7 +10,7 @@ use core::marker::PhantomData;
 
 // Re-export all components
 pub use primitives::{BlockNumber, Header};
-pub use serai_primitives as primitives;
+pub use wikiblocks_primitives as primitives;
 
 pub use frame_support as support;
 pub use frame_system as system;
@@ -80,7 +80,7 @@ pub type SignedExtra = (
   transaction_payment::ChargeTransactionPayment<Runtime>,
 );
 
-pub type Transaction = serai_abi::tx::Transaction<RuntimeCall, SignedExtra>;
+pub type Transaction = wikiblocks_abi::tx::Transaction<RuntimeCall, SignedExtra>;
 pub type Block = generic::Block<Header, Transaction>;
 pub type BlockId = generic::BlockId<Block>;
 
@@ -140,7 +140,7 @@ pub struct CallFilter;
 impl Contains<RuntimeCall> for CallFilter {
   fn contains(call: &RuntimeCall) -> bool {
     // If the call is defined in our ABI, it's allowed
-    let call: Result<serai_abi::Call, ()> = call.clone().try_into();
+    let call: Result<wikiblocks_abi::Call, ()> = call.clone().try_into();
     call.is_ok()
   }
 }

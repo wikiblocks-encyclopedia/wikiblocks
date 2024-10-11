@@ -5,7 +5,7 @@
 
 extern crate alloc;
 
-pub use serai_primitives as primitives;
+pub use wikiblocks_primitives as primitives;
 
 pub mod system;
 
@@ -31,7 +31,7 @@ pub enum Call {
 // TODO: Remove this
 #[derive(Clone, PartialEq, Eq, Debug, scale::Encode, scale::Decode, scale_info::TypeInfo)]
 pub enum TransactionPaymentEvent {
-  TransactionFeePaid { who: serai_primitives::SeraiAddress, actual_fee: u64, tip: u64 },
+  TransactionFeePaid { who: wikiblocks_primitives::SeraiAddress, actual_fee: u64, tip: u64 },
 }
 
 #[derive(Clone, PartialEq, Eq, Debug, scale::Encode, scale::Decode, scale_info::TypeInfo)]

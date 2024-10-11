@@ -15,7 +15,7 @@ use sp_core::sr25519::Public;
 #[cfg(not(feature = "std"))]
 use sp_std::vec::Vec;
 
-use serai_primitives::NetworkId;
+use wikiblocks_primitives::NetworkId;
 
 /// The maximum amount of key shares per set.
 pub const MAX_KEY_SHARES_PER_SET: u32 = 150;

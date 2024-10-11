@@ -1,6 +1,6 @@
 use frame_support::dispatch::{DispatchInfo, DispatchError};
 
-use serai_primitives::SeraiAddress;
+use wikiblocks_primitives::SeraiAddress;
 
 #[derive(Clone, PartialEq, Eq, Debug, scale::Encode, scale::Decode, scale_info::TypeInfo)]
 pub enum Event {

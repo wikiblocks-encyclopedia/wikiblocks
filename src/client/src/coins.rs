@@ -1,14 +1,14 @@
 use scale::Encode;
 
-use serai_abi::primitives::{SeraiAddress, Amount, Coin, Balance};
-pub use serai_abi::coins::primitives;
+use wikiblocks_abi::primitives::{SeraiAddress, Amount, Coin, Balance};
+pub use wikiblocks_abi::coins::primitives;
 use primitives::OutInstructionWithBalance;
 
 use crate::{TemporalSerai, SeraiError};
 
 const PALLET: &str = "Coins";
 
-pub type CoinsEvent = serai_abi::coins::Event;
+pub type CoinsEvent = wikiblocks_abi::coins::Event;
 
 #[derive(Clone, Copy)]
 pub struct SeraiCoins<'a>(pub(crate) &'a TemporalSerai<'a>);
@@ -17,7 +17,7 @@ impl<'a> SeraiCoins<'a> {
     self
       .0
       .events(|event| {
-        if let serai_abi::Event::Coins(event) = event {
+        if let wikiblocks_abi::Event::Coins(event) = event {
           if matches!(event, CoinsEvent::Mint { .. }) {
             Some(event.clone())
           } else {
@@ -34,7 +34,7 @@ impl<'a> SeraiCoins<'a> {
     self
       .0
       .events(|event| {
-        if let serai_abi::Event::Coins(event) = event {
+        if let wikiblocks_abi::Event::Coins(event) = event {
           if matches!(event, CoinsEvent::BurnWithInstruction { .. }) {
             Some(event.clone())
           } else {
@@ -69,15 +69,15 @@ impl<'a> SeraiCoins<'a> {
     )
   }
 
-  pub fn transfer(to: SeraiAddress, balance: Balance) -> serai_abi::Call {
-    serai_abi::Call::Coins(serai_abi::coins::Call::transfer { to, balance })
+  pub fn transfer(to: SeraiAddress, balance: Balance) -> wikiblocks_abi::Call {
+    wikiblocks_abi::Call::Coins(wikiblocks_abi::coins::Call::transfer { to, balance })
   }
 
-  pub fn burn(balance: Balance) -> serai_abi::Call {
-    serai_abi::Call::Coins(serai_abi::coins::Call::burn { balance })
+  pub fn burn(balance: Balance) -> wikiblocks_abi::Call {
+    wikiblocks_abi::Call::Coins(wikiblocks_abi::coins::Call::burn { balance })
   }
 
-  pub fn burn_with_instruction(instruction: OutInstructionWithBalance) -> serai_abi::Call {
-    serai_abi::Call::Coins(serai_abi::coins::Call::burn_with_instruction { instruction })
+  pub fn burn_with_instruction(instruction: OutInstructionWithBalance) -> wikiblocks_abi::Call {
+    wikiblocks_abi::Call::Coins(wikiblocks_abi::coins::Call::burn_with_instruction { instruction })
   }
 }

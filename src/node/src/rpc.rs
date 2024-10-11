@@ -6,7 +6,7 @@ use sp_blockchain::{Error as BlockchainError, HeaderBackend, HeaderMetadata};
 use sp_block_builder::BlockBuilder;
 use sp_api::ProvideRuntimeApi;
 
-use serai_runtime::{
+use wikiblocks_runtime::{
   primitives::{SubstrateAmount, PublicKey},
   Nonce, Block, SeraiRuntimeApi,
 };

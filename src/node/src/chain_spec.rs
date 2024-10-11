@@ -5,7 +5,7 @@ use sp_core::{Decode, Pair as PairTrait, sr25519::Public};
 
 use sc_service::ChainType;
 
-use serai_runtime::{
+use wikiblocks_runtime::{
   primitives::*, WASM_BINARY, BABE_GENESIS_EPOCH_CONFIG, RuntimeGenesisConfig, SystemConfig,
   CoinsConfig, ValidatorSetsConfig, BabeConfig, GrandpaConfig,
 };

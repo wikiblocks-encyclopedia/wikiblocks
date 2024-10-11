@@ -1,7 +1,7 @@
-pub use serai_validator_sets_primitives as primitives;
+pub use wikiblocks_validator_sets_primitives as primitives;
 
-use serai_primitives::*;
-use serai_validator_sets_primitives::*;
+use wikiblocks_primitives::*;
+use primitives::*;
 
 #[derive(Clone, PartialEq, Eq, Debug, scale::Encode, scale::Decode, scale_info::TypeInfo)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]

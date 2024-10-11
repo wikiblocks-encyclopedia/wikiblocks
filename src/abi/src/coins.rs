@@ -1,6 +1,6 @@
-use serai_primitives::{Balance, SeraiAddress};
+use wikiblocks_primitives::{Balance, SeraiAddress};
 
-pub use serai_coins_primitives as primitives;
+pub use wikiblocks_coins_primitives as primitives;
 use primitives::OutInstructionWithBalance;
 
 #[derive(Clone, PartialEq, Eq, Debug, scale::Encode, scale::Decode, scale_info::TypeInfo)]

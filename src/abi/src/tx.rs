@@ -3,7 +3,7 @@ use scale::Encode;
 use sp_core::sr25519::{Public, Signature};
 use sp_runtime::traits::Verify;
 
-use serai_primitives::SeraiAddress;
+use wikiblocks_primitives::SeraiAddress;
 
 use frame_support::dispatch::GetDispatchInfo;
 

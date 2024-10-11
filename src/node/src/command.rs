@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use serai_runtime::Block;
+use wikiblocks_runtime::Block;
 
 use sc_service::{PruningMode, PartialComponents};
 

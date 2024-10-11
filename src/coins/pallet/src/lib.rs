@@ -1,6 +1,6 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
-use serai_primitives::{Balance, Coin, ExternalBalance, SubstrateAmount};
+use wikiblocks_primitives::{Balance, Coin, ExternalBalance, SubstrateAmount};
 
 pub trait AllowMint {
   fn is_allowed(balance: &ExternalBalance) -> bool;
@@ -29,7 +29,7 @@ pub mod pallet {
 
   use pallet_transaction_payment::{Config as TpConfig, OnChargeTransaction};
 
-  use serai_primitives::*;
+  use wikiblocks_primitives::*;
   pub use coins_primitives as primitives;
   use primitives::*;
 
