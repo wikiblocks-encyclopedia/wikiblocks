@@ -83,7 +83,7 @@ pub mod pallet {
   #[pallet::genesis_config]
   #[derive(Clone, PartialEq, Eq, Debug, Encode, Decode)]
   pub struct GenesisConfig<T: Config> {
-    /// Networks to spawn Serai with, and the stake requirement per key share.
+    /// Networks to spawn Wikiblocks with, and the stake requirement per key share.
     ///
     /// Every participant at genesis will automatically be assumed to have this much stake.
     /// This stake cannot be withdrawn however as there's no actual stake behind it.
@@ -134,7 +134,7 @@ pub mod pallet {
     StorageMap<_, Blake2_128Concat, Public, u64, OptionQuery>;
 
   impl<T: Config> Pallet<T> {
-    // This exists as InSet, for Serai, is the validators set for the next session, *not* the
+    // This exists as InSet, for Wikiblocks, is the validators set for the next session, *not* the
     // current set's validators
     fn in_active_set(account: Public) -> bool {
       // TODO: is_member is internally O(n). Update Babe to use an O(1) storage lookup?
@@ -617,18 +617,18 @@ pub mod pallet {
     fn rotate_session() {
       // next wikiblocks validators that is in the queue.
       let now_validators = Participants::<T>::get()
-        .expect("no Serai participants upon rotate_session");
-      let prior_serai_session = Self::session().unwrap();
+        .expect("no Wikiblocks participants upon rotate_session");
+      let prior_wikiblocks_session = Self::session().unwrap();
 
       // TODO: T::SessionHandler::on_before_session_ending() was here.
       // end the current wikiblocks session.
-      Self::retire_set(prior_serai_session);
+      Self::retire_set(prior_wikiblocks_session);
 
       // make a new session and get the next validator set.
       Self::new_session();
 
       // Update Babe and Grandpa
-      let session = prior_serai_session.0 + 1;
+      let session = prior_wikiblocks_session.0 + 1;
       let next_validators = Participants::<T>::get().unwrap();
       Babe::<T>::enact_epoch_change(
         WeakBoundedVec::force_from(

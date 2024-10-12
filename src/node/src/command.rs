@@ -14,7 +14,7 @@ use crate::{
 
 impl SubstrateCli for Cli {
   fn impl_name() -> String {
-    "Serai Node".into()
+    "Wikiblocks Node".into()
   }
 
   fn impl_version() -> String {

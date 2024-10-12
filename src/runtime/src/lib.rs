@@ -301,7 +301,7 @@ mod benches {
 
 sp_api::decl_runtime_apis! {
   #[api_version(1)]
-  pub trait SeraiRuntimeApi {
+  pub trait WikiblocksRuntimeApi {
     fn validators() -> Vec<PublicKey>;
   }
 }
@@ -491,17 +491,17 @@ sp_api::impl_runtime_apis! {
   impl sp_authority_discovery::AuthorityDiscoveryApi<Block> for Runtime {
     fn authorities() -> Vec<AuthorityDiscoveryId> {
       // Converts to `[u8; 32]` so it can be hashed
-      let serai_validators = Babe::authorities()
+      let wikiblocks_validators = Babe::authorities()
         .into_iter()
         .map(|(id, _)| id.into_inner().0)
         .collect::<hashbrown::HashSet<_>>();
-      serai_validators
+      wikiblocks_validators
       .into_iter()
       .map(|id| AuthorityDiscoveryId::from(PublicKey::from_raw(id))).collect()
     }
   }
 
-  impl crate::SeraiRuntimeApi<Block> for Runtime {
+  impl crate::WikiblocksRuntimeApi<Block> for Runtime {
     fn validators() -> Vec<PublicKey> {
       Babe::authorities()
       .into_iter()

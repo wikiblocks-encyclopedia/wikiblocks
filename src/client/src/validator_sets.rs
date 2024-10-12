@@ -6,16 +6,16 @@ use wikiblocks_abi::primitives::SubstrateAmount;
 pub use wikiblocks_abi::validator_sets::primitives;
 use primitives::Session;
 
-use crate::{TemporalSerai, SeraiError};
+use crate::{TemporalWikiblocks, WikiblocksError};
 
 const PALLET: &str = "ValidatorSets";
 
 pub type ValidatorSetsEvent = wikiblocks_abi::validator_sets::Event;
 
 #[derive(Clone, Copy)]
-pub struct SeraiValidatorSets<'a>(pub(crate) &'a TemporalSerai<'a>);
-impl<'a> SeraiValidatorSets<'a> {
-  pub async fn new_session_events(&self) -> Result<Vec<ValidatorSetsEvent>, SeraiError> {
+pub struct WikiblocksValidatorSets<'a>(pub(crate) &'a TemporalWikiblocks<'a>);
+impl<'a> WikiblocksValidatorSets<'a> {
+  pub async fn new_session_events(&self) -> Result<Vec<ValidatorSetsEvent>, WikiblocksError> {
     self
       .0
       .events(|event| {
@@ -32,7 +32,9 @@ impl<'a> SeraiValidatorSets<'a> {
       .await
   }
 
-  pub async fn participant_removed_events(&self) -> Result<Vec<ValidatorSetsEvent>, SeraiError> {
+  pub async fn participant_removed_events(
+    &self,
+  ) -> Result<Vec<ValidatorSetsEvent>, WikiblocksError> {
     self
       .0
       .events(|event| {
@@ -49,7 +51,7 @@ impl<'a> SeraiValidatorSets<'a> {
       .await
   }
 
-  pub async fn set_retired_events(&self) -> Result<Vec<ValidatorSetsEvent>, SeraiError> {
+  pub async fn set_retired_events(&self) -> Result<Vec<ValidatorSetsEvent>, WikiblocksError> {
     self
       .0
       .events(|event| {
@@ -66,23 +68,23 @@ impl<'a> SeraiValidatorSets<'a> {
       .await
   }
 
-  pub async fn session(&self) -> Result<Option<Session>, SeraiError> {
+  pub async fn session(&self) -> Result<Option<Session>, WikiblocksError> {
     self.0.storage(PALLET, "CurrentSession", ()).await
   }
 
-  pub async fn participants(&self) -> Result<Option<Vec<(Public, u64)>>, SeraiError> {
+  pub async fn participants(&self) -> Result<Option<Vec<(Public, u64)>>, WikiblocksError> {
     self.0.storage(PALLET, "Participants", ()).await
   }
 
-  pub async fn allocation_per_key_share(&self) -> Result<SubstrateAmount, SeraiError> {
+  pub async fn allocation_per_key_share(&self) -> Result<SubstrateAmount, WikiblocksError> {
     Ok(self.0.storage(PALLET, "AllocationPerKeyShare", ()).await?.unwrap())
   }
 
-  pub async fn total_allocated_stake(&self) -> Result<Option<SubstrateAmount>, SeraiError> {
+  pub async fn total_allocated_stake(&self) -> Result<Option<SubstrateAmount>, WikiblocksError> {
     self.0.storage(PALLET, "TotalAllocatedStake", ()).await
   }
 
-  pub async fn allocation(&self, key: Public) -> Result<Option<SubstrateAmount>, SeraiError> {
+  pub async fn allocation(&self, key: Public) -> Result<Option<SubstrateAmount>, WikiblocksError> {
     self.0.storage(PALLET, "Allocations", (sp_core::hashing::blake2_128(&key.encode()), key)).await
   }
 
@@ -90,7 +92,7 @@ impl<'a> SeraiValidatorSets<'a> {
     &self,
     account: Public,
     session: Session,
-  ) -> Result<Option<SubstrateAmount>, SeraiError> {
+  ) -> Result<Option<SubstrateAmount>, WikiblocksError> {
     self
       .0
       .storage(
@@ -101,11 +103,14 @@ impl<'a> SeraiValidatorSets<'a> {
       .await
   }
 
-  pub async fn active_network_validators(&self) -> Result<Vec<Public>, SeraiError> {
-    self.0.runtime_api("SeraiRuntimeApi_validators", ()).await
+  pub async fn active_network_validators(&self) -> Result<Vec<Public>, WikiblocksError> {
+    self.0.runtime_api("WikiblocksRuntimeApi_validators", ()).await
   }
 
-  pub async fn session_begin_block(&self, session: Session) -> Result<Option<u64>, SeraiError> {
+  pub async fn session_begin_block(
+    &self,
+    session: Session,
+  ) -> Result<Option<u64>, WikiblocksError> {
     self.0.storage(PALLET, "SessionBeginBlock", session).await
   }
 

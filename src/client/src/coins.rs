@@ -3,16 +3,16 @@ use scale::Encode;
 use wikiblocks_abi::primitives::{SubstrateAmount, WikiblocksAddress};
 pub use wikiblocks_abi::coins::primitives;
 
-use crate::{TemporalSerai, SeraiError};
+use crate::{TemporalWikiblocks, WikiblocksError};
 
 const PALLET: &str = "Coins";
 
 pub type CoinsEvent = wikiblocks_abi::coins::Event;
 
 #[derive(Clone, Copy)]
-pub struct SeraiCoins<'a>(pub(crate) &'a TemporalSerai<'a>);
-impl<'a> SeraiCoins<'a> {
-  pub async fn mint_events(&self) -> Result<Vec<CoinsEvent>, SeraiError> {
+pub struct WikiblocksCoins<'a>(pub(crate) &'a TemporalWikiblocks<'a>);
+impl<'a> WikiblocksCoins<'a> {
+  pub async fn mint_events(&self) -> Result<Vec<CoinsEvent>, WikiblocksError> {
     self
       .0
       .events(|event| {
@@ -29,11 +29,14 @@ impl<'a> SeraiCoins<'a> {
       .await
   }
 
-  pub async fn supply(&self) -> Result<SubstrateAmount, SeraiError> {
+  pub async fn supply(&self) -> Result<SubstrateAmount, WikiblocksError> {
     Ok(self.0.storage(PALLET, "Supply", ()).await?.unwrap_or(0))
   }
 
-  pub async fn balance(&self, address: WikiblocksAddress) -> Result<SubstrateAmount, SeraiError> {
+  pub async fn balance(
+    &self,
+    address: WikiblocksAddress,
+  ) -> Result<SubstrateAmount, WikiblocksError> {
     Ok(
       self
         .0

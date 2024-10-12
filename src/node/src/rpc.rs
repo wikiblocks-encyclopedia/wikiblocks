@@ -8,7 +8,7 @@ use sp_api::ProvideRuntimeApi;
 
 use wikiblocks_runtime::{
   primitives::{SubstrateAmount, PublicKey},
-  Nonce, Block, SeraiRuntimeApi,
+  Nonce, Block, WikiblocksRuntimeApi,
 };
 
 use tokio::sync::RwLock;
@@ -40,7 +40,7 @@ pub fn create_full<
 where
   C::Api: substrate_frame_rpc_system::AccountNonceApi<Block, PublicKey, Nonce>
     + pallet_transaction_payment_rpc::TransactionPaymentRuntimeApi<Block, SubstrateAmount>
-    + SeraiRuntimeApi<Block>
+    + WikiblocksRuntimeApi<Block>
     + BlockBuilder<Block>,
 {
   use substrate_frame_rpc_system::{System, SystemApiServer};

@@ -1,7 +1,7 @@
 [package]
 name = "wikiblocks-coins-pallet"
 version = "0.1.0"
-description = "Coins pallet for Serai"
+description = "Coins pallet for Wikiblocks"
 license = "AGPL-3.0-only"
 repository = "https://github.com/akildemir/wikiblocks/tree/develop/substrate/coins/pallet"
 authors = ["Akil Demir <akildemir72@gmail.com>"]
