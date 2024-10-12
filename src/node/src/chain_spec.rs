@@ -33,21 +33,7 @@ fn devnet_genesis(
   endowed_accounts: Vec<PublicKey>,
 ) -> RuntimeGenesisConfig {
   let validators = validators.iter().map(|name| account_from_name(name)).collect::<Vec<_>>();
-  let key_shares = NETWORKS
-    .iter()
-    .map(|network| match network {
-      NetworkId::Serai => (NetworkId::Serai, Amount(50_000 * 10_u64.pow(8))),
-      NetworkId::External(ExternalNetworkId::Bitcoin) => {
-        (NetworkId::External(ExternalNetworkId::Bitcoin), Amount(1_000_000 * 10_u64.pow(8)))
-      }
-      NetworkId::External(ExternalNetworkId::Ethereum) => {
-        (NetworkId::External(ExternalNetworkId::Ethereum), Amount(1_000_000 * 10_u64.pow(8)))
-      }
-      NetworkId::External(ExternalNetworkId::Monero) => {
-        (NetworkId::External(ExternalNetworkId::Monero), Amount(100_000 * 10_u64.pow(8)))
-      }
-    })
-    .collect::<Vec<_>>();
+  let key_share_amount = 50_000 * 10_u64.pow(8);
 
   RuntimeGenesisConfig {
     system: SystemConfig { code: wasm_binary.to_vec(), _config: PhantomData },
@@ -60,8 +46,8 @@ fn devnet_genesis(
     },
 
     validator_sets: ValidatorSetsConfig {
-      networks: key_shares.clone(),
-      participants: validators.clone(),
+      key_share_amount,
+      participants: validators.iter().map(|validator| (*validator, key_share_amount)).collect(),
     },
 
     babe: BabeConfig {
@@ -81,23 +67,8 @@ fn testnet_genesis(wasm_binary: &[u8], validators: Vec<&'static str>) -> Runtime
     .into_iter()
     .map(|validator| Public::decode(&mut hex::decode(validator).unwrap().as_slice()).unwrap())
     .collect::<Vec<_>>();
-  let key_shares = NETWORKS
-    .iter()
-    .map(|network| match network {
-      NetworkId::Serai => (NetworkId::Serai, Amount(50_000 * 10_u64.pow(8))),
-      NetworkId::External(ExternalNetworkId::Bitcoin) => {
-        (NetworkId::External(ExternalNetworkId::Bitcoin), Amount(1_000_000 * 10_u64.pow(8)))
-      }
-      NetworkId::External(ExternalNetworkId::Ethereum) => {
-        (NetworkId::External(ExternalNetworkId::Ethereum), Amount(1_000_000 * 10_u64.pow(8)))
-      }
-      NetworkId::External(ExternalNetworkId::Monero) => {
-        (NetworkId::External(ExternalNetworkId::Monero), Amount(100_000 * 10_u64.pow(8)))
-      }
-    })
-    .collect::<Vec<_>>();
-
   assert_eq!(validators.iter().collect::<HashSet<_>>().len(), validators.len());
+  let key_share_amount = 50_000 * 10_u64.pow(8);
 
   RuntimeGenesisConfig {
     system: SystemConfig { code: wasm_binary.to_vec(), _config: PhantomData },
@@ -105,13 +76,13 @@ fn testnet_genesis(wasm_binary: &[u8], validators: Vec<&'static str>) -> Runtime
     transaction_payment: Default::default(),
 
     coins: CoinsConfig {
-      accounts: endowed_accounts.into_iter().map(|a| (a, 1 << 60)).collect(),
+      accounts: validators.iter().map(|a| (*a, 5_000_000 * 10_u64.pow(8))).collect(),
       _ignore: Default::default(),
     },
 
     validator_sets: ValidatorSetsConfig {
-      networks: key_shares.clone(),
-      participants: validators.clone(),
+      key_share_amount: 50_000 * 10_u64.pow(8),
+      participants: validators.iter().map(|validator| (*validator, key_share_amount)).collect(),
     },
 
     babe: BabeConfig {

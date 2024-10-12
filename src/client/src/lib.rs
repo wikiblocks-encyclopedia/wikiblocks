@@ -15,8 +15,8 @@ pub use wikiblocks_abi as abi;
 pub use abi::{primitives, Transaction};
 use abi::*;
 
-pub use primitives::{WikiblocksAddress, Signature, Amount};
-use primitives::{Header, NetworkId};
+pub use primitives::{WikiblocksAddress, Signature};
+use primitives::Header;
 
 pub mod coins;
 pub use coins::SeraiCoins;
@@ -304,11 +304,8 @@ impl Serai {
   }
 
   /// Return the P2P Multiaddrs for the validators of the specified network.
-  pub async fn p2p_validators(
-    &self,
-    network: NetworkId,
-  ) -> Result<Vec<multiaddr::Multiaddr>, SeraiError> {
-    self.call("p2p_validators", network).await
+  pub async fn p2p_validators(&self) -> Result<Vec<multiaddr::Multiaddr>, SeraiError> {
+    self.call("p2p_validators", ()).await
   }
 }
 

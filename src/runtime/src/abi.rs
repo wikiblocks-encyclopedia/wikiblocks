@@ -17,25 +17,22 @@ impl From<Call> for RuntimeCall {
         RuntimeCall::Timestamp(timestamp::Call::set { now })
       }
       Call::Coins(coins) => match coins {
-        wikiblocks_abi::coins::Call::transfer { to, balance } => {
-          RuntimeCall::Coins(coins::Call::transfer { to: to.into(), balance })
+        wikiblocks_abi::coins::Call::transfer { to, amount } => {
+          RuntimeCall::Coins(coins::Call::transfer { to: to.into(), amount })
         }
-        wikiblocks_abi::coins::Call::burn { balance } => {
-          RuntimeCall::Coins(coins::Call::burn { balance })
-        }
-        wikiblocks_abi::coins::Call::burn_with_instruction { instruction } => {
-          RuntimeCall::Coins(coins::Call::burn_with_instruction { instruction })
+        wikiblocks_abi::coins::Call::burn { amount } => {
+          RuntimeCall::Coins(coins::Call::burn { amount })
         }
       },
       Call::ValidatorSets(vs) => match vs {
-        wikiblocks_abi::validator_sets::Call::allocate { network, amount } => {
-          RuntimeCall::ValidatorSets(validator_sets::Call::allocate { network, amount })
+        wikiblocks_abi::validator_sets::Call::allocate { amount } => {
+          RuntimeCall::ValidatorSets(validator_sets::Call::allocate { amount })
         }
-        wikiblocks_abi::validator_sets::Call::deallocate { network, amount } => {
-          RuntimeCall::ValidatorSets(validator_sets::Call::deallocate { network, amount })
+        wikiblocks_abi::validator_sets::Call::deallocate { amount } => {
+          RuntimeCall::ValidatorSets(validator_sets::Call::deallocate { amount })
         }
-        wikiblocks_abi::validator_sets::Call::claim_deallocation { network, session } => {
-          RuntimeCall::ValidatorSets(validator_sets::Call::claim_deallocation { network, session })
+        wikiblocks_abi::validator_sets::Call::claim_deallocation { session } => {
+          RuntimeCall::ValidatorSets(validator_sets::Call::claim_deallocation { session })
         }
       },
       Call::Babe(babe) => match babe {
@@ -87,24 +84,21 @@ impl TryInto<Call> for RuntimeCall {
         Call::Timestamp(wikiblocks_abi::timestamp::Call::set { now })
       }
       RuntimeCall::Coins(call) => Call::Coins(match call {
-        coins::Call::transfer { to, balance } => {
-          wikiblocks_abi::coins::Call::transfer { to: to.into(), balance }
+        coins::Call::transfer { to, amount } => {
+          wikiblocks_abi::coins::Call::transfer { to: to.into(), amount }
         }
-        coins::Call::burn { balance } => wikiblocks_abi::coins::Call::burn { balance },
-        coins::Call::burn_with_instruction { instruction } => {
-          wikiblocks_abi::coins::Call::burn_with_instruction { instruction }
-        }
+        coins::Call::burn { amount } => wikiblocks_abi::coins::Call::burn { amount },
         _ => Err(())?,
       }),
       RuntimeCall::ValidatorSets(call) => Call::ValidatorSets(match call {
-        validator_sets::Call::allocate { network, amount } => {
-          wikiblocks_abi::validator_sets::Call::allocate { network, amount }
+        validator_sets::Call::allocate { amount } => {
+          wikiblocks_abi::validator_sets::Call::allocate { amount }
         }
-        validator_sets::Call::deallocate { network, amount } => {
-          wikiblocks_abi::validator_sets::Call::deallocate { network, amount }
+        validator_sets::Call::deallocate { amount } => {
+          wikiblocks_abi::validator_sets::Call::deallocate { amount }
         }
-        validator_sets::Call::claim_deallocation { network, session } => {
-          wikiblocks_abi::validator_sets::Call::claim_deallocation { network, session }
+        validator_sets::Call::claim_deallocation { session } => {
+          wikiblocks_abi::validator_sets::Call::claim_deallocation { session }
         }
         _ => Err(())?,
       }),

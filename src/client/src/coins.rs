@@ -1,8 +1,7 @@
 use scale::Encode;
 
-use wikiblocks_abi::primitives::{Amount, Balance, Coin, SubstrateAmount, WikiblocksAddress};
+use wikiblocks_abi::primitives::{SubstrateAmount, WikiblocksAddress};
 pub use wikiblocks_abi::coins::primitives;
-use primitives::OutInstructionWithBalance;
 
 use crate::{TemporalSerai, SeraiError};
 
@@ -30,8 +29,8 @@ impl<'a> SeraiCoins<'a> {
       .await
   }
 
-  pub async fn coin_supply(&self, coin: Coin) -> Result<SubstrateAmount, SeraiError> {
-    self.0.storage(PALLET, "Supply", coin).await
+  pub async fn supply(&self) -> Result<SubstrateAmount, SeraiError> {
+    Ok(self.0.storage(PALLET, "Supply", ()).await?.unwrap_or(0))
   }
 
   pub async fn balance(&self, address: WikiblocksAddress) -> Result<SubstrateAmount, SeraiError> {
