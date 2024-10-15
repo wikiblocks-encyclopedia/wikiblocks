@@ -22,25 +22,25 @@ pub mod pallet {
   use primitives::*;
 
   #[pallet::config]
-  pub trait Config<I: 'static = ()>: frame_system::Config<AccountId = Public> {
-    type RuntimeEvent: From<Event<Self, I>> + IsType<<Self as frame_system::Config>::RuntimeEvent>;
+  pub trait Config: frame_system::Config<AccountId = Public> {
+    type RuntimeEvent: From<Event<Self>> + IsType<<Self as frame_system::Config>::RuntimeEvent>;
   }
 
   #[pallet::genesis_config]
   #[derive(Clone, PartialEq, Eq, Debug, Encode, Decode)]
-  pub struct GenesisConfig<T: Config<I>, I: 'static = ()> {
+  pub struct GenesisConfig<T: Config> {
     pub accounts: Vec<(T::AccountId, SubstrateAmount)>,
-    pub _ignore: PhantomData<I>,
+    pub _ignore: PhantomData<T>,
   }
 
-  impl<T: Config<I>, I: 'static> Default for GenesisConfig<T, I> {
+  impl<T: Config> Default for GenesisConfig<T> {
     fn default() -> Self {
       GenesisConfig { accounts: Default::default(), _ignore: Default::default() }
     }
   }
 
   #[pallet::error]
-  pub enum Error<T, I = ()> {
+  pub enum Error<T> {
     AmountOverflowed,
     NotEnoughCoins,
     MintNotAllowed,
@@ -48,86 +48,84 @@ pub mod pallet {
 
   #[pallet::event]
   #[pallet::generate_deposit(fn deposit_event)]
-  pub enum Event<T: Config<I>, I: 'static = ()> {
+  pub enum Event<T: Config> {
     Mint { to: Public, amount: SubstrateAmount },
     Burn { from: Public, amount: SubstrateAmount },
     Transfer { from: Public, to: Public, amount: SubstrateAmount },
   }
 
   #[pallet::pallet]
-  pub struct Pallet<T, I = ()>(_);
+  pub struct Pallet<T>(_);
 
   /// The amount of coins each account has.
   // Identity is used as the second key's hasher due to it being a non-manipulatable fixed-space
   // ID.
   #[pallet::storage]
   #[pallet::getter(fn balances)]
-  pub type Balances<T: Config<I>, I: 'static = ()> =
+  pub type Balances<T: Config> =
     StorageMap<_, Blake2_128Concat, Public, SubstrateAmount, OptionQuery>;
 
   /// The total supply of each coin.
   // We use Identity type here again due to reasons stated in the Balances Storage.
   #[pallet::storage]
   #[pallet::getter(fn supply)]
-  pub type Supply<T: Config<I>, I: 'static = ()> = StorageValue<_, SubstrateAmount, ValueQuery>;
+  pub type Supply<T: Config> = StorageValue<_, SubstrateAmount, ValueQuery>;
 
   #[pallet::genesis_build]
-  impl<T: Config<I>, I: 'static> BuildGenesisConfig for GenesisConfig<T, I> {
+  impl<T: Config> BuildGenesisConfig for GenesisConfig<T> {
     fn build(&self) {
-      Supply::<T, I>::set(0);
+      Supply::<T>::set(0);
       // initialize the genesis accounts
       for (account, balance) in &self.accounts {
-        Pallet::<T, I>::mint(*account, *balance).unwrap();
+        Pallet::<T>::mint(*account, *balance).unwrap();
       }
     }
   }
 
-  impl<T: Config<I>, I: 'static> Pallet<T, I> {
-    fn decrease_balance_internal(from: Public, amount: SubstrateAmount) -> Result<(), Error<T, I>> {
+  impl<T: Config> Pallet<T> {
+    fn decrease_balance_internal(from: Public, amount: SubstrateAmount) -> Result<(), Error<T>> {
       // sub amount from account
       let new_amount = Self::balances(from)
-        .ok_or(Error::<T, I>::NotEnoughCoins)?
+        .ok_or(Error::<T>::NotEnoughCoins)?
         .checked_sub(amount)
-        .ok_or(Error::<T, I>::NotEnoughCoins)?;
+        .ok_or(Error::<T>::NotEnoughCoins)?;
 
       // save
       if new_amount == 0 {
-        Balances::<T, I>::remove(from);
+        Balances::<T>::remove(from);
       } else {
-        Balances::<T, I>::set(from, Some(new_amount));
+        Balances::<T>::set(from, Some(new_amount));
       }
       Ok(())
     }
 
-    fn increase_balance_internal(to: Public, amount: SubstrateAmount) -> Result<(), Error<T, I>> {
+    fn increase_balance_internal(to: Public, amount: SubstrateAmount) -> Result<(), Error<T>> {
       // add amount to account
-      let new_amount = Self::balances(to)
-        .unwrap_or(0)
-        .checked_add(amount)
-        .ok_or(Error::<T, I>::AmountOverflowed)?;
+      let new_amount =
+        Self::balances(to).unwrap_or(0).checked_add(amount).ok_or(Error::<T>::AmountOverflowed)?;
 
       // save
-      Balances::<T, I>::set(to, Some(new_amount));
+      Balances::<T>::set(to, Some(new_amount));
       Ok(())
     }
 
     /// Mint `balance` to the given account.
     ///
     /// Errors if any amount overflows.
-    pub fn mint(to: Public, amount: SubstrateAmount) -> Result<(), Error<T, I>> {
+    pub fn mint(to: Public, amount: SubstrateAmount) -> Result<(), Error<T>> {
       // update the balance
       Self::increase_balance_internal(to, amount)?;
 
       // update the supply
-      let new_supply = Self::supply().checked_add(amount).ok_or(Error::<T, I>::AmountOverflowed)?;
-      Supply::<T, I>::set(new_supply);
+      let new_supply = Self::supply().checked_add(amount).ok_or(Error::<T>::AmountOverflowed)?;
+      Supply::<T>::set(new_supply);
 
       Self::deposit_event(Event::Mint { to, amount });
       Ok(())
     }
 
     /// Burn `balance` from the specified account.
-    fn burn_internal(from: Public, amount: SubstrateAmount) -> Result<(), Error<T, I>> {
+    fn burn_internal(from: Public, amount: SubstrateAmount) -> Result<(), Error<T>> {
       // don't waste time if amount == 0
       if amount == 0 {
         return Ok(());
@@ -138,7 +136,7 @@ pub mod pallet {
 
       // update the supply
       let new_supply = Self::supply().checked_sub(amount).unwrap();
-      Supply::<T, I>::set(new_supply);
+      Supply::<T>::set(new_supply);
 
       Ok(())
     }
@@ -148,7 +146,7 @@ pub mod pallet {
       from: Public,
       to: Public,
       amount: SubstrateAmount,
-    ) -> Result<(), Error<T, I>> {
+    ) -> Result<(), Error<T>> {
       // update balances of accounts
       Self::decrease_balance_internal(from, amount)?;
       Self::increase_balance_internal(to, amount)?;
@@ -158,7 +156,7 @@ pub mod pallet {
   }
 
   #[pallet::call]
-  impl<T: Config<I>, I: 'static> Pallet<T, I> {
+  impl<T: Config> Pallet<T> {
     #[pallet::call_index(0)]
     #[pallet::weight((0, DispatchClass::Normal))] // TODO
     pub fn transfer(origin: OriginFor<T>, to: Public, amount: SubstrateAmount) -> DispatchResult {
