@@ -118,11 +118,8 @@ pub mod pallet {
   /// This method allows iterating over all validators and their stake.
   #[pallet::storage]
   #[pallet::getter(fn participants_for_latest_decided_set)]
-  pub(crate) type Participants<T: Config> = StorageValue<
-    _,
-    BoundedVec<(Public, u64), ConstU32<{ MAX_KEY_SHARES_PER_SET }>>,
-    OptionQuery,
-  >;
+  pub(crate) type Participants<T: Config> =
+    StorageValue<_, BoundedVec<(Public, u64), ConstU32<{ MAX_KEY_SHARES_PER_SET }>>, OptionQuery>;
 
   /// The validators selected to be in-set, regardless of if removed.
   ///
@@ -130,8 +127,7 @@ pub mod pallet {
   /// shares.
   // Uses Identity for NetworkId to avoid a hash of a severely limited fixed key-space.
   #[pallet::storage]
-  pub(crate) type InSet<T: Config> =
-    StorageMap<_, Blake2_128Concat, Public, u64, OptionQuery>;
+  pub(crate) type InSet<T: Config> = StorageMap<_, Blake2_128Concat, Public, u64, OptionQuery>;
 
   impl<T: Config> Pallet<T> {
     // This exists as InSet, for Wikiblocks, is the validators set for the next session, *not* the
@@ -186,10 +182,7 @@ pub mod pallet {
     StorageMap<_, Identity, ([u8; 8], [u8; 16], Public), (), OptionQuery>;
   impl<T: Config> Pallet<T> {
     #[inline]
-    fn sorted_allocation_key(
-      key: Public,
-      amount: SubstrateAmount,
-    ) -> ([u8; 8], [u8; 16], Public) {
+    fn sorted_allocation_key(key: Public, amount: SubstrateAmount) -> ([u8; 8], [u8; 16], Public) {
       let amount = reverse_lexicographic_order(amount.to_be_bytes());
       let hash = sp_io::hashing::blake2_128(&(amount, key).encode());
       (amount, hash, key)
@@ -263,15 +256,8 @@ pub mod pallet {
 
   /// Pending deallocations, keyed by the Session they become unlocked on.
   #[pallet::storage]
-  type PendingDeallocations<T: Config> = StorageDoubleMap<
-    _,
-    Blake2_128Concat,
-    Public,
-    Identity,
-    Session,
-    SubstrateAmount,
-    OptionQuery,
-  >;
+  type PendingDeallocations<T: Config> =
+    StorageDoubleMap<_, Blake2_128Concat, Public, Identity, Session, SubstrateAmount, OptionQuery>;
 
   /// Disabled validators.
   #[pallet::storage]
@@ -280,8 +266,7 @@ pub mod pallet {
   /// Mapping from session to its starting block number.
   #[pallet::storage]
   #[pallet::getter(fn session_begin_block)]
-  pub type SessionBeginBlock<T: Config> =
-    StorageMap<_, Identity, Session, u64, ValueQuery>;
+  pub type SessionBeginBlock<T: Config> = StorageMap<_, Identity, Session, u64, ValueQuery>;
 
   #[pallet::event]
   #[pallet::generate_deposit(pub(super) fn deposit_event)]
@@ -486,9 +471,7 @@ pub mod pallet {
       // If they're in the current set, and the current set has completed its handover (so its
       // currently being tracked by TotalAllocatedStake), update the TotalAllocatedStake
       if InSet::<T>::contains_key(account) {
-        TotalAllocatedStake::<T>::set(
-          Some(TotalAllocatedStake::<T>::get().unwrap_or(0) + amount),
-        );
+        TotalAllocatedStake::<T>::set(Some(TotalAllocatedStake::<T>::get().unwrap_or(0) + amount));
       }
 
       Ok(())
@@ -521,8 +504,7 @@ pub mod pallet {
       account: T::AccountId,
       amount: SubstrateAmount,
     ) -> Result<bool, DispatchError> {
-      let old_allocation =
-        Self::allocation(account).ok_or(Error::<T>::NonExistentValidator)?;
+      let old_allocation = Self::allocation(account).ok_or(Error::<T>::NonExistentValidator)?;
       let new_allocation =
         old_allocation.checked_sub(amount).ok_or(Error::<T>::NotEnoughAllocated)?;
 
@@ -568,13 +550,8 @@ pub mod pallet {
       // Set it to PendingDeallocations, letting it be released upon a future session
       // This unwrap should be fine as this account is active, meaning a session has occurred
       let to_unlock_on = Self::session_to_unlock_on_for_current_set().unwrap();
-      let existing =
-        PendingDeallocations::<T>::get(account, to_unlock_on).unwrap_or(0);
-      PendingDeallocations::<T>::set(
-        account,
-        to_unlock_on,
-        Some(existing + amount),
-      );
+      let existing = PendingDeallocations::<T>::get(account, to_unlock_on).unwrap_or(0);
+      PendingDeallocations::<T>::set(account, to_unlock_on, Some(existing + amount));
 
       Self::deposit_event(Event::AllocationDecreased {
         validator: account,
@@ -588,9 +565,9 @@ pub mod pallet {
     fn set_total_allocated_stake() {
       let participants = Participants::<T>::get()
         .expect("setting TotalAllocatedStake for a network without participants");
-      let total_stake = participants.iter().fold(0, |acc, (addr, _)| {
-        acc + Allocations::<T>::get(addr).unwrap_or(0)
-      });
+      let total_stake = participants
+        .iter()
+        .fold(0, |acc, (addr, _)| acc + Allocations::<T>::get(addr).unwrap_or(0));
       TotalAllocatedStake::<T>::set(Some(total_stake));
     }
 
@@ -607,17 +584,14 @@ pub mod pallet {
     /// Take the amount deallocatable.
     ///
     /// `session` refers to the Session the stake becomes deallocatable on.
-    fn take_deallocatable_amount(
-      session: Session,
-      key: Public,
-    ) -> Option<SubstrateAmount> {
+    fn take_deallocatable_amount(session: Session, key: Public) -> Option<SubstrateAmount> {
       PendingDeallocations::<T>::take(key, session)
     }
 
     fn rotate_session() {
       // next wikiblocks validators that is in the queue.
-      let now_validators = Participants::<T>::get()
-        .expect("no Wikiblocks participants upon rotate_session");
+      let now_validators =
+        Participants::<T>::get().expect("no Wikiblocks participants upon rotate_session");
       let prior_wikiblocks_session = Self::session().unwrap();
 
       // TODO: T::SessionHandler::on_before_session_ending() was here.
@@ -664,11 +638,7 @@ pub mod pallet {
     ) -> DispatchResult {
       // TODO: Should this call be part of the `increase_allocation` since we have to have it
       // before each call to it?
-      Coins::<T>::transfer_internal(
-        account,
-        Self::account(),
-        amount,
-      )?;
+      Coins::<T>::transfer_internal(account, Self::account(), amount)?;
       Self::increase_allocation(account, amount, true)
     }
 
@@ -709,11 +679,7 @@ pub mod pallet {
       }
 
       // burn the allocation from the stake account
-      Coins::<T>::burn(
-        RawOrigin::Signed(Self::account()).into(),
-        allocation,
-      )
-      .unwrap();
+      Coins::<T>::burn(RawOrigin::Signed(Self::account()).into(), allocation).unwrap();
     }
 
     /// Disable a validator, preventing them from further authoring blocks.
@@ -727,10 +693,7 @@ pub mod pallet {
         DisabledIndices::<T>::set(u32::try_from(index).unwrap(), Some(validator));
 
         let session = Self::session().unwrap();
-        Self::deposit_event(Event::ParticipantRemoved {
-          session,
-          removed: validator,
-        });
+        Self::deposit_event(Event::ParticipantRemoved { session, removed: validator });
 
         true
       } else {
@@ -745,11 +708,7 @@ pub mod pallet {
     #[pallet::weight(0)] // TODO
     pub fn allocate(origin: OriginFor<T>, amount: SubstrateAmount) -> DispatchResult {
       let validator = ensure_signed(origin)?;
-      Coins::<T>::transfer_internal(
-        validator,
-        Self::account(),
-        amount
-      )?;
+      Coins::<T>::transfer_internal(validator, Self::account(), amount)?;
       Self::increase_allocation(validator, amount, false)
     }
 
@@ -760,11 +719,7 @@ pub mod pallet {
 
       let can_immediately_deallocate = Self::decrease_allocation(account, amount)?;
       if can_immediately_deallocate {
-        Coins::<T>::transfer_internal(
-          Self::account(),
-          account,
-          amount
-        )?;
+        Coins::<T>::transfer_internal(Self::account(), account, amount)?;
       }
 
       Ok(())
@@ -772,19 +727,12 @@ pub mod pallet {
 
     #[pallet::call_index(2)]
     #[pallet::weight((0, DispatchClass::Operational))] // TODO
-    pub fn claim_deallocation(
-      origin: OriginFor<T>,
-      session: Session,
-    ) -> DispatchResult {
+    pub fn claim_deallocation(origin: OriginFor<T>, session: Session) -> DispatchResult {
       let account = ensure_signed(origin)?;
       let Some(amount) = Self::take_deallocatable_amount(session, account) else {
         Err(Error::<T>::NonExistentDeallocation)?
       };
-      Coins::<T>::transfer_internal(
-        Self::account(),
-        account,
-        amount
-      )?;
+      Coins::<T>::transfer_internal(Self::account(), account, amount)?;
       Self::deposit_event(Event::DeallocationClaimed { validator: account, session });
       Ok(())
     }
