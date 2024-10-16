@@ -34,8 +34,14 @@ pub use account::*;
 mod constants;
 pub use constants::*;
 
+mod script;
+pub use script::*;
+
 pub type BlockNumber = u64;
 pub type Header = sp_runtime::generic::Header<BlockNumber, sp_runtime::traits::BlakeTwo256>;
+
+// A version of an article
+pub type ArticleVersion = u32;
 
 #[cfg(feature = "borsh")]
 pub fn borsh_serialize_bounded_vec<W: borsh::io::Write, T: BorshSerialize, const B: u32>(
@@ -53,12 +59,12 @@ pub fn borsh_deserialize_bounded_vec<R: borsh::io::Read, T: BorshDeserialize, co
   vec.try_into().map_err(|_| borsh::io::Error::other("bound exceeded"))
 }
 
-// Should be enough for a Uniswap v3 call
-pub const MAX_DATA_LEN: u32 = 512;
+// Should be enough for a title
+pub const MAX_TITLE_LEN: u32 = 1000;
 #[derive(Clone, PartialEq, Eq, Debug, Encode, Decode, MaxEncodedLen, TypeInfo)]
 #[cfg_attr(feature = "borsh", derive(BorshSerialize, BorshDeserialize))]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-pub struct Data(
+pub struct Title(
   #[cfg_attr(
     feature = "borsh",
     borsh(
@@ -66,20 +72,20 @@ pub struct Data(
       deserialize_with = "borsh_deserialize_bounded_vec"
     )
   )]
-  BoundedVec<u8, ConstU32<{ MAX_DATA_LEN }>>,
+  BoundedVec<u8, ConstU32<{ MAX_TITLE_LEN }>>,
 );
 
 #[cfg(feature = "std")]
-impl Zeroize for Data {
+impl Zeroize for Title {
   fn zeroize(&mut self) {
     self.0.as_mut().zeroize()
   }
 }
 
-impl Data {
+impl Title {
   #[cfg(feature = "std")]
-  pub fn new(data: Vec<u8>) -> Result<Data, &'static str> {
-    Ok(Data(data.try_into().map_err(|_| "data length exceeds {MAX_DATA_LEN}")?))
+  pub fn new(data: Vec<u8>) -> Result<Title, &'static str> {
+    Ok(Title(data.try_into().map_err(|_| "title length exceeds {MAX_TITLE_LEN}")?))
   }
 
   pub fn data(&self) -> &[u8] {
@@ -92,7 +98,52 @@ impl Data {
   }
 }
 
-impl AsRef<[u8]> for Data {
+impl AsRef<[u8]> for Title {
+  fn as_ref(&self) -> &[u8] {
+    self.0.as_ref()
+  }
+}
+
+// Should be enough for an article(Longest wikipedia article is about half of this size)
+pub const MAX_BODY_LEN: u32 = 500_000;
+#[derive(Clone, PartialEq, Eq, Debug, Encode, Decode, MaxEncodedLen, TypeInfo)]
+#[cfg_attr(feature = "borsh", derive(BorshSerialize, BorshDeserialize))]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+pub struct Body(
+  #[cfg_attr(
+    feature = "borsh",
+    borsh(
+      serialize_with = "borsh_serialize_bounded_vec",
+      deserialize_with = "borsh_deserialize_bounded_vec"
+    )
+  )]
+  BoundedVec<u8, ConstU32<{ MAX_BODY_LEN }>>,
+);
+
+#[cfg(feature = "std")]
+impl Zeroize for Body {
+  fn zeroize(&mut self) {
+    self.0.as_mut().zeroize()
+  }
+}
+
+impl Body {
+  #[cfg(feature = "std")]
+  pub fn new(data: Vec<u8>) -> Result<Body, &'static str> {
+    Ok(Body(data.try_into().map_err(|_| "body length exceeds {MAX_BODY_LEN}")?))
+  }
+
+  pub fn data(&self) -> &[u8] {
+    self.0.as_ref()
+  }
+
+  #[cfg(feature = "std")]
+  pub fn consume(self) -> Vec<u8> {
+    self.0.into_inner()
+  }
+}
+
+impl AsRef<[u8]> for Body {
   fn as_ref(&self) -> &[u8] {
     self.0.as_ref()
   }
