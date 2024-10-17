@@ -1,5 +1,7 @@
 use super::*;
 
+use sp_std::vec::Vec;
+
 #[derive(Clone, PartialEq, Eq, Debug, Encode, Decode, MaxEncodedLen, TypeInfo)]
 #[cfg_attr(feature = "borsh", derive(BorshSerialize, BorshDeserialize))]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
@@ -46,7 +48,6 @@ pub struct Script(
 );
 
 impl Script {
-  #[cfg(feature = "std")]
   pub fn new(data: Vec<OpCode>) -> Result<Script, &'static str> {
     Ok(Script(data.try_into().map_err(|_| "Script length exceeds {MAX_SCRIPT_LEN}")?))
   }
@@ -55,7 +56,6 @@ impl Script {
     self.0.as_ref()
   }
 
-  #[cfg(feature = "std")]
   pub fn consume(self) -> Vec<OpCode> {
     self.0.into_inner()
   }

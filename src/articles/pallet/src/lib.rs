@@ -1,11 +1,13 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
+#[allow(clippy::cast_possible_truncation)]
 #[frame_support::pallet]
 pub mod pallet {
   use frame_system::pallet_prelude::*;
   use frame_support::pallet_prelude::*;
 
   use sp_core::sr25519::Public;
+  use sp_std::vec;
 
   use wikiblocks_primitives::{ArticleVersion, Body, OpCode, Script, Title};
 
@@ -52,7 +54,7 @@ pub mod pallet {
   impl<T: Config> Pallet<T> {
     // TODO: this can be optimized to O(1) using maps
     fn title_exist(title: &Title) -> bool {
-      Self::titles().iter().find(|&t| t == title).is_some()
+      Self::titles().iter().any(|t| t == title)
     }
 
     fn validate_add_article_script(script: &Script) -> Result<(Title, Body), Error<T>> {
@@ -102,7 +104,7 @@ pub mod pallet {
       }
 
       // add version script can't have Title opcode
-      if script.data().iter().find(|&code| matches!(code, OpCode::Title(..))).is_some() {
+      if script.data().iter().any(|code| matches!(code, OpCode::Title(..))) {
         Err(Error::<T>::InvalidScript)?;
       }
 
