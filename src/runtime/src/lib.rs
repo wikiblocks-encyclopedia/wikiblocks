@@ -21,6 +21,7 @@ pub use pallet_transaction_payment as transaction_payment;
 
 pub use coins_pallet as coins;
 pub use validator_sets_pallet as validator_sets;
+pub use articles_pallet as articles;
 
 pub use pallet_babe as babe;
 pub use pallet_grandpa as grandpa;
@@ -197,6 +198,10 @@ impl validator_sets::Config for Runtime {
   type ShouldEndSession = Babe;
 }
 
+impl articles::Config for Runtime {
+  type RuntimeEvent = RuntimeEvent;
+}
+
 pub struct IdentityValidatorIdOf;
 impl Convert<PublicKey, Option<PublicKey>> for IdentityValidatorIdOf {
   fn convert(key: PublicKey) -> Option<PublicKey> {
@@ -273,6 +278,7 @@ construct_runtime!(
 
     Coins: coins,
     ValidatorSets: validator_sets,
+    Articles: articles,
 
     Babe: babe,
     Grandpa: grandpa,

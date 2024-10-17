@@ -60,6 +60,8 @@ coins-pallet = { package = "wikiblocks-coins-pallet", path = "../coins/pallet", 
 
 validator-sets-pallet = { package = "wikiblocks-validator-sets-pallet", path = "../validator-sets/pallet", default-features = false }
 
+articles-pallet = { package = "wikiblocks-articles-pallet", path = "../articles/pallet", default-features = false }
+
 pallet-babe = { git = "https://github.com/serai-dex/substrate", default-features = false }
 pallet-grandpa = { git = "https://github.com/serai-dex/substrate", default-features = false }
 
@@ -109,6 +111,8 @@ std = [
   "coins-pallet/std",
 
   "validator-sets-pallet/std",
+
+  "articles-pallet/std",
 
   "pallet-babe/std",
   "pallet-grandpa/std",

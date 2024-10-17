@@ -8449,6 +8449,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "wikiblocks-articles-pallet"
+version = "0.1.0"
+dependencies = [
+ "frame-support",
+ "frame-system",
+ "parity-scale-codec",
+ "scale-info",
+ "sp-core",
+ "sp-runtime",
+ "sp-std",
+ "wikiblocks-primitives",
+]
+
+[[package]]
 name = "wikiblocks-client"
 version = "0.1.0"
 dependencies = [
@@ -8596,6 +8610,7 @@ dependencies = [
  "sp-version",
  "substrate-wasm-builder",
  "wikiblocks-abi",
+ "wikiblocks-articles-pallet",
  "wikiblocks-coins-pallet",
  "wikiblocks-primitives",
  "wikiblocks-validator-sets-pallet",
