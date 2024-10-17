@@ -4,32 +4,30 @@ use super::*;
 #[cfg_attr(feature = "borsh", derive(BorshSerialize, BorshDeserialize))]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub enum Direction {
-  RIGHT,
-  LEFT,
+  Right,
+  Left,
 }
 
 #[derive(Clone, PartialEq, Eq, Debug, Encode, Decode, MaxEncodedLen, TypeInfo)]
 #[cfg_attr(feature = "borsh", derive(BorshSerialize, BorshDeserialize))]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub enum OpCode {
-  // Specifies the title for an article
-  TITLE(Title),
-  // Specifies the body for an article
-  BODY(Body),
-  // Puts the cursor to the beginning of an article
-  BEGIN,
-  // Puts the cursor to the end of an article
-  END,
+  // Specifies the title
+  Title(Title),
+  // Puts the cursor to the beginning of the body data
+  Begin,
+  // Puts the cursor to the end of body data
+  End,
   // Moves cursor `number` times in the direction
   MvCr(Direction, u32),
   // Adds the body data to the left starting from cursor position.
   // Final cursor position is the end of the data.
-  ADD(Body),
+  Add(Body),
   // Deletes the `number` times of character from the right.
   // Final cursor position is last deleted character.
-  DEL(u32),
+  Del(u32),
   // Copies “number” times of characters from the right. Cursor position doesn’t change.
-  CP(u32),
+  Cp(u32),
 }
 
 pub const MAX_SCRIPT_LEN: u32 = 1_000;
