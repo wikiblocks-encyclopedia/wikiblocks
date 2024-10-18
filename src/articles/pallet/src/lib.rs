@@ -1,5 +1,11 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
+#[cfg(test)]
+mod mock;
+
+#[cfg(test)]
+mod tests;
+
 #[allow(clippy::cast_possible_truncation)]
 #[frame_support::pallet]
 pub mod pallet {
@@ -21,6 +27,7 @@ pub mod pallet {
     InvalidScript,
     TitleAlreadyExist,
     InvalidTitle,
+    InvalidReference,
     StorageFull,
   }
 
@@ -103,9 +110,27 @@ pub mod pallet {
         Err(Error::<T>::InvalidTitle)?;
       }
 
-      // add version script can't have Title opcode
-      if script.data().iter().any(|code| matches!(code, OpCode::Title(..))) {
-        Err(Error::<T>::InvalidScript)?;
+      // verify the opcodes
+      let last_version = Self::versions(title).ok_or(Error::<T>::InvalidScript)?;
+      let mut reference_in_hand = false;
+      for opcode in script.data() {
+        // add version script can't have a Title opcode
+        if matches!(opcode, OpCode::Title(..)) {
+          Err(Error::<T>::InvalidScript)?;
+        }
+
+        // make sure all reference versions exist
+        if let OpCode::Reference(v) = opcode {
+          if *v > last_version {
+            Err(Error::<T>::InvalidReference)?;
+          }
+          reference_in_hand = true;
+        }
+
+        // if we have an opcode that requires reference to work on, we must have a reference
+        if opcode.requires_reference() && !reference_in_hand {
+          Err(Error::<T>::InvalidScript)?;
+        }
       }
 
       Ok(())
@@ -121,7 +146,6 @@ pub mod pallet {
 
       // TODO: check the total "data" within the script. It should be as big as tx size
       // at the moment.
-
       // TODO: Did the fee for this article been collected? Check that fee amount is right.
 
       // TODO: we should prevent the cloning here
@@ -132,7 +156,7 @@ pub mod pallet {
         Err(Error::<T>::StorageFull)?;
       }
 
-      // insert a version
+      // insert the version
       Versions::<T>::set(&title, Some(0));
 
       // insert the body
@@ -150,8 +174,9 @@ pub mod pallet {
 
       // TODO: check the total "data" within the script. It should be as big as tx size
       // at the moment.
-
       // TODO: Did the fee for this article been collected? Check that fee amount is right.
+
+      // validate the script
       Self::validate_add_version_script(&title, &script)?;
 
       // update the versions
@@ -163,7 +188,7 @@ pub mod pallet {
       Articles::<T>::set((&title, version), Some(script));
 
       // insert the author
-      Authors::<T>::set((title, version), Some(from));
+      Authors::<T>::set((&title, version), Some(from));
       Ok(())
     }
   }

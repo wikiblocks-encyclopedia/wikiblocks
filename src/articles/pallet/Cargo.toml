@@ -31,6 +31,9 @@ sp-runtime = { git = "https://github.com/serai-dex/substrate", default-features 
 
 wikiblocks-primitives = { path = "../../primitives", default-features = false, features = ["serde"] }
 
+[dev-dependencies]
+sp-io = { git = "https://github.com/serai-dex/substrate", default-features = false }
+
 [features]
 std = [
   "frame-system/std",
@@ -38,6 +41,7 @@ std = [
 
   "sp-core/std",
   "sp-std/std",
+  "sp-io/std",
   "sp-runtime/std",
 
   "wikiblocks-primitives/std",

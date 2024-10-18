@@ -16,6 +16,9 @@ pub enum Direction {
 pub enum OpCode {
   // Specifies the title
   Title(Title),
+  // Specifies the reference version that opcodes will be applied
+  // until the next reference opcode in the script.
+  Reference(ArticleVersion),
   // Puts the cursor to the beginning of the body data
   Begin,
   // Puts the cursor to the end of body data
@@ -30,6 +33,16 @@ pub enum OpCode {
   Del(u32),
   // Copies “number” times of characters from the right. Cursor position doesn’t change.
   Cp(u32),
+}
+// NOTE: Default cursor position is the beginning of the body.
+
+impl OpCode {
+  pub fn requires_reference(&self) -> bool {
+    match self {
+      OpCode::Title(_) | OpCode::Reference(_) | OpCode::Add(_) => false,
+      _ => true,
+    }
+  }
 }
 
 pub const MAX_SCRIPT_LEN: u32 = 1_000;
