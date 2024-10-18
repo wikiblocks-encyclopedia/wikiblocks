@@ -5,7 +5,7 @@ use scale::{Encode, Decode};
 use wikiblocks_abi::Call;
 
 use crate::{
-  timestamp, coins,
+  timestamp, coins, articles,
   validator_sets::{self, MembershipProof},
   babe, grandpa, RuntimeCall,
 };
@@ -33,6 +33,14 @@ impl From<Call> for RuntimeCall {
         }
         wikiblocks_abi::validator_sets::Call::claim_deallocation { session } => {
           RuntimeCall::ValidatorSets(validator_sets::Call::claim_deallocation { session })
+        }
+      },
+      Call::Articles(articles) => match articles {
+        wikiblocks_abi::articles::Call::add_article { script } => {
+          RuntimeCall::Articles(articles::Call::add_article { script })
+        }
+        wikiblocks_abi::articles::Call::add_version { title, script } => {
+          RuntimeCall::Articles(articles::Call::add_version { title, script })
         }
       },
       Call::Babe(babe) => match babe {
@@ -99,6 +107,15 @@ impl TryInto<Call> for RuntimeCall {
         }
         validator_sets::Call::claim_deallocation { session } => {
           wikiblocks_abi::validator_sets::Call::claim_deallocation { session }
+        }
+        _ => Err(())?,
+      }),
+      RuntimeCall::Articles(call) => Call::Articles(match call {
+        articles::Call::add_article { script } => {
+          wikiblocks_abi::articles::Call::add_article { script }
+        }
+        articles::Call::add_version { title, script } => {
+          wikiblocks_abi::articles::Call::add_version { title, script }
         }
         _ => Err(())?,
       }),
