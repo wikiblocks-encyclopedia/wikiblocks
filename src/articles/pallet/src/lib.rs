@@ -29,6 +29,7 @@ pub mod pallet {
     InvalidTitle,
     InvalidReference,
     StorageFull,
+    TooManyVersions,
   }
 
   #[pallet::event]
@@ -60,7 +61,7 @@ pub mod pallet {
 
   impl<T: Config> Pallet<T> {
     // TODO: this can be optimized to O(1) using maps
-    fn title_exist(title: &Title) -> bool {
+    pub fn title_exist(title: &Title) -> bool {
       Self::titles().iter().any(|t| t == title)
     }
 
@@ -111,7 +112,7 @@ pub mod pallet {
       }
 
       // verify the opcodes
-      let last_version = Self::versions(title).ok_or(Error::<T>::InvalidScript)?;
+      let last_version = Self::versions(title).ok_or(Error::<T>::InvalidTitle)?;
       let mut reference_in_hand = false;
       for opcode in script.data() {
         // add version script can't have a Title opcode
@@ -181,7 +182,8 @@ pub mod pallet {
 
       // update the versions
       // we can unwrap here since we pass the validation, so we have the title hence a version
-      let version = Self::versions(&title).unwrap() + 1;
+      let version =
+        Self::versions(&title).unwrap().checked_add(1).ok_or(Error::<T>::TooManyVersions)?;
       Versions::<T>::set(&title, Some(version));
 
       // insert the body for the version

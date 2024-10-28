@@ -21,7 +21,9 @@ pub use pallet_transaction_payment as transaction_payment;
 
 pub use coins_pallet as coins;
 pub use validator_sets_pallet as validator_sets;
+
 pub use articles_pallet as articles;
+pub use votes_pallet as votes;
 
 pub use pallet_babe as babe;
 pub use pallet_grandpa as grandpa;
@@ -202,6 +204,10 @@ impl articles::Config for Runtime {
   type RuntimeEvent = RuntimeEvent;
 }
 
+impl votes::Config for Runtime {
+  type RuntimeEvent = RuntimeEvent;
+}
+
 pub struct IdentityValidatorIdOf;
 impl Convert<PublicKey, Option<PublicKey>> for IdentityValidatorIdOf {
   fn convert(key: PublicKey) -> Option<PublicKey> {
@@ -279,6 +285,7 @@ construct_runtime!(
     Coins: coins,
     ValidatorSets: validator_sets,
     Articles: articles,
+    Votes: votes,
 
     Babe: babe,
     Grandpa: grandpa,

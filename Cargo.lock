@@ -8615,6 +8615,7 @@ dependencies = [
  "wikiblocks-coins-pallet",
  "wikiblocks-primitives",
  "wikiblocks-validator-sets-pallet",
+ "wikiblocks-votes-pallet",
 ]
 
 [[package]]
@@ -8652,6 +8653,22 @@ dependencies = [
  "sp-std",
  "wikiblocks-primitives",
  "zeroize",
+]
+
+[[package]]
+name = "wikiblocks-votes-pallet"
+version = "0.1.0"
+dependencies = [
+ "frame-support",
+ "frame-system",
+ "parity-scale-codec",
+ "scale-info",
+ "sp-core",
+ "sp-io",
+ "sp-runtime",
+ "sp-std",
+ "wikiblocks-articles-pallet",
+ "wikiblocks-primitives",
 ]
 
 [[package]]

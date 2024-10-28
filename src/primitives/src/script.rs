@@ -38,10 +38,7 @@ pub enum OpCode {
 
 impl OpCode {
   pub fn requires_reference(&self) -> bool {
-    match self {
-      OpCode::Title(_) | OpCode::Reference(_) | OpCode::Add(_) => false,
-      _ => true,
-    }
+    !matches!(self, OpCode::Title(_) | OpCode::Reference(_) | OpCode::Add(_))
   }
 }
 
