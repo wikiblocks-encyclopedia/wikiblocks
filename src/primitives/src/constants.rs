@@ -14,3 +14,7 @@ pub const WEEKS: BlockNumber = 7 * DAYS;
 pub const MONTHS: BlockNumber = 30 * DAYS;
 // Defines a year as 12 inaccurate months, which is 360 days literally (~1.5% off)
 pub const YEARS: BlockNumber = 12 * MONTHS;
+
+// 1000b/1usd rate for data insert into the chain.
+// this represent a usd. 1000 mill.
+pub const DATA_FEE_RATE: u64 = 1000;

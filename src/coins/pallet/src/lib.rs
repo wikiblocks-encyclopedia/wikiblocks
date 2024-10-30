@@ -1,5 +1,11 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
+use wikiblocks_primitives::SubstrateAmount;
+
+pub trait CallToFee<T: frame_system::Config> {
+  fn call_to_fee(call: &T::RuntimeCall) -> SubstrateAmount;
+}
+
 // TODO: Investigate why Substrate generates this
 #[allow(unreachable_patterns, clippy::cast_possible_truncation)]
 #[frame_support::pallet]
@@ -17,13 +23,13 @@ pub mod pallet {
 
   use pallet_transaction_payment::{Config as TpConfig, OnChargeTransaction};
 
-  use wikiblocks_primitives::*;
   pub use coins_primitives as primitives;
   use primitives::*;
 
   #[pallet::config]
   pub trait Config: frame_system::Config<AccountId = Public> {
     type RuntimeEvent: From<Event<Self>> + IsType<<Self as frame_system::Config>::RuntimeEvent>;
+    type CallToFee: CallToFee<Self>;
   }
 
   #[pallet::genesis_config]
@@ -185,13 +191,19 @@ pub mod pallet {
 
     fn withdraw_fee(
       who: &Public,
-      _call: &T::RuntimeCall,
+      call: &T::RuntimeCall,
       _dispatch_info: &DispatchInfoOf<T::RuntimeCall>,
       fee: Self::Balance,
-      _tip: Self::Balance,
+      tip: Self::Balance,
     ) -> Result<Self::LiquidityInfo, TransactionValidityError> {
       if fee == 0 {
         return Ok(None);
+      }
+
+      // check we have the right amount of fee for the call
+      let amount = T::CallToFee::call_to_fee(call);
+      if tip < amount {
+        Err(InvalidTransaction::Payment)?;
       }
 
       match Self::transfer_internal(*who, FEE_ACCOUNT.into(), fee) {

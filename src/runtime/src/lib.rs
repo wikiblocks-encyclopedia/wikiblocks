@@ -10,6 +10,7 @@ use core::marker::PhantomData;
 
 // Re-export all components
 pub use primitives::{BlockNumber, Header};
+use scale::Encode;
 pub use wikiblocks_primitives as primitives;
 
 pub use frame_support as support;
@@ -190,8 +191,32 @@ impl transaction_payment::Config for Runtime {
   type FeeMultiplierUpdate = ();
 }
 
+pub struct FeeCollector;
+impl coins::CallToFee<Runtime> for FeeCollector {
+  fn call_to_fee(call: &RuntimeCall) -> SubstrateAmount {
+    // TODO: convert following mills to how much token we need through an oracle.
+    match call {
+      RuntimeCall::Articles(c) => match c {
+        articles_pallet::Call::add_article { script } => {
+          u64::try_from(script.encode().len()).unwrap()
+        }
+        articles_pallet::Call::add_version { title, script } => {
+          u64::try_from(title.encode().len() + script.encode().len()).unwrap()
+        }
+        _ => unreachable!(),
+      },
+      RuntimeCall::Votes(c) => match c {
+        votes_pallet::Call::upvote { .. } => 10, // 10 / token_price = fee_in_token
+        _ => unreachable!(),
+      },
+      _ => 0,
+    }
+  }
+}
+
 impl coins::Config for Runtime {
   type RuntimeEvent = RuntimeEvent;
+  type CallToFee = FeeCollector;
 }
 
 impl validator_sets::Config for Runtime {
