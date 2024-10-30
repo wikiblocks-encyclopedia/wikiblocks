@@ -22,6 +22,8 @@ pub mod coins;
 pub use coins::WikiblocksCoins;
 pub mod validator_sets;
 pub use validator_sets::WikiblocksValidatorSets;
+pub mod articles;
+pub use articles::WikiblocksArticles;
 
 #[derive(Clone, PartialEq, Eq, Debug, scale::Encode, scale::Decode)]
 pub struct Block {
@@ -392,5 +394,9 @@ impl<'a> TemporalWikiblocks<'a> {
 
   pub fn validator_sets(&'a self) -> WikiblocksValidatorSets<'a> {
     WikiblocksValidatorSets(self)
+  }
+
+  pub fn articles(&'a self) -> WikiblocksArticles<'a> {
+    WikiblocksArticles(self)
   }
 }
