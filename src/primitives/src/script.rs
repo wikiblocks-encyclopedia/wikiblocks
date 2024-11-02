@@ -76,5 +76,3 @@ impl AsRef<[OpCode]> for Script {
     self.0.as_ref()
   }
 }
-
-// TODO: MAX_DATA_LEN should be the size of the all data in a given script

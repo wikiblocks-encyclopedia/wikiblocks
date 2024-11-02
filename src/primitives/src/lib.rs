@@ -104,8 +104,11 @@ impl AsRef<[u8]> for Title {
   }
 }
 
-// Should be enough for an article(Longest wikipedia article is about half of this size)
-pub const MAX_BODY_LEN: u32 = 500_000;
+// Maximum encoded size of a given script (1Mb)
+pub const MAX_DATA_LEN: u32 = 1024 * 1024;
+
+// A body can be as big as all tha data within the script except the title.
+pub const MAX_BODY_LEN: u32 = MAX_DATA_LEN - MAX_TITLE_LEN;
 #[derive(Clone, PartialEq, Eq, Debug, Encode, Decode, MaxEncodedLen, TypeInfo)]
 #[cfg_attr(feature = "borsh", derive(BorshSerialize, BorshDeserialize))]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]

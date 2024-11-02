@@ -15,7 +15,7 @@ pub mod pallet {
   use sp_core::sr25519::Public;
   use sp_std::vec;
 
-  use wikiblocks_primitives::{ArticleVersion, Body, OpCode, Script, Title};
+  use wikiblocks_primitives::{ArticleVersion, Body, OpCode, Script, Title, MAX_DATA_LEN};
 
   #[pallet::config]
   pub trait Config: frame_system::Config<AccountId = Public> {
@@ -30,6 +30,7 @@ pub mod pallet {
     InvalidReference,
     StorageFull,
     TooManyVersions,
+    ArticleTooBig,
   }
 
   #[pallet::event]
@@ -101,6 +102,11 @@ pub mod pallet {
     }
 
     fn validate_add_version_script(title: &Title, script: &Script) -> Result<(), Error<T>> {
+      // check the total "data" within the script.
+      if script.encode().len() > usize::try_from(MAX_DATA_LEN).unwrap() {
+        Err(Error::<T>::ArticleTooBig)?;
+      }
+
       // script can't be empty
       if script.data().is_empty() {
         Err(Error::<T>::InvalidScript)?;
@@ -145,10 +151,6 @@ pub mod pallet {
     pub fn add_article(origin: OriginFor<T>, script: Script) -> DispatchResult {
       let from = ensure_signed(origin)?;
 
-      // TODO: check the total "data" within the script. It should be as big as tx size
-      // at the moment.
-      // TODO: Did the fee for this article been collected? Check that fee amount is right.
-
       // TODO: we should prevent the cloning here
       let (title, body) = Self::validate_add_article_script(&script)?;
 
@@ -172,10 +174,6 @@ pub mod pallet {
     #[pallet::weight((0, DispatchClass::Normal))] // TODO
     pub fn add_version(origin: OriginFor<T>, title: Title, script: Script) -> DispatchResult {
       let from = ensure_signed(origin)?;
-
-      // TODO: check the total "data" within the script. It should be as big as tx size
-      // at the moment.
-      // TODO: Did the fee for this article been collected? Check that fee amount is right.
 
       // validate the script
       Self::validate_add_version_script(&title, &script)?;
