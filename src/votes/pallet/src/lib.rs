@@ -54,7 +54,7 @@ pub mod pallet {
       let Some(versions) = Articles::<T>::versions(&title) else {
         return Err(Error::<T>::InvalidVersion)?;
       };
-      if version > versions {
+      if version.0 > versions.0 {
         Err(Error::<T>::InvalidVersion)?;
       }
 

@@ -1,6 +1,6 @@
 use crate::{wikiblocks_test, publish_tx};
 
-use wikiblocks_abi::primitives::{insecure_pair_from_name, Body, OpCode, Script, Title};
+use wikiblocks_abi::primitives::{insecure_pair_from_name, ArticleVersion, Body, OpCode, Script, Title};
 use wikiblocks_client::{Wikiblocks, WikiblocksArticles};
 
 wikiblocks_test!(
@@ -34,7 +34,7 @@ async fn test_add_article(wikiblocks: Wikiblocks) {
     .await
     .unwrap()
     .articles()
-    .article(&title, 0)
+    .article(&title, ArticleVersion(0))
     .await
     .unwrap()
     .unwrap();

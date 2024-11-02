@@ -4,7 +4,7 @@ use frame_support::{assert_noop, assert_ok};
 use frame_system::RawOrigin;
 
 use sp_core::Pair;
-use wikiblocks_primitives::{insecure_pair_from_name, Body, OpCode, Script, Title};
+use wikiblocks_primitives::{insecure_pair_from_name, ArticleVersion, Body, OpCode, Script, Title};
 
 #[test]
 fn add_article() {
@@ -24,14 +24,14 @@ fn add_article() {
 
     // check that we have a version 0 for it
     let versions = Articles::versions(&title).unwrap();
-    assert_eq!(versions, 0);
+    assert_eq!(versions, ArticleVersion(0));
 
     // check that we have a body for the version
-    let in_chain_script = Articles::articles((&title, 0)).unwrap();
+    let in_chain_script = Articles::articles((&title, ArticleVersion(0))).unwrap();
     assert_eq!(in_chain_script, Script::new(vec![OpCode::Add(body)]).unwrap());
 
     // check the author is right
-    let author = Articles::authors((&title, 0)).unwrap();
+    let author = Articles::authors((&title, ArticleVersion(0))).unwrap();
     assert_eq!(author, user);
   })
 }
@@ -52,7 +52,7 @@ fn add_version() {
     let body2 =
       Body::new("\n this is a second line added the first version".as_bytes().to_vec()).unwrap();
     let script = Script::new(vec![
-      OpCode::Reference(0),
+      OpCode::Reference(ArticleVersion(0)),
       OpCode::Cp(body.data().len().try_into().unwrap()), // copy all data from the ref version.
       OpCode::Add(body2),                                // continue by adding the body2 data
     ])
@@ -69,10 +69,10 @@ fn add_version() {
 
     // check that we have 2 version of it
     let versions = Articles::versions(&title).unwrap();
-    assert_eq!(versions, 1); // 0, 1
+    assert_eq!(versions, ArticleVersion(1)); // 0, 1
 
     // check that we have a body for the version
-    let in_chain_script = Articles::articles((&title, 1)).unwrap();
+    let in_chain_script = Articles::articles((&title, ArticleVersion(1))).unwrap();
     assert_eq!(in_chain_script, script);
   })
 }
@@ -187,7 +187,8 @@ fn add_version_invalid_script() {
     );
 
     // can't have a reference version that is invalid
-    let script = Script::new(vec![OpCode::Reference(2), add_opcode.clone()]).unwrap();
+    let script =
+      Script::new(vec![OpCode::Reference(ArticleVersion(2)), add_opcode.clone()]).unwrap();
     assert_noop!(
       Articles::add_version(RawOrigin::Signed(user).into(), title.clone(), script),
       pallet::Error::<Test>::InvalidReference

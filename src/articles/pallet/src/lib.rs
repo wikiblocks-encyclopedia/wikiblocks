@@ -45,6 +45,7 @@ pub mod pallet {
 
   /// Stores the last article version. If this returns Let's say `ArticleVersion(5)` that means
   /// there are versions 0, 1, 2, 3, 4, 5 for the article.
+  /// // TODO: rename to LastVersion
   #[pallet::storage]
   #[pallet::getter(fn versions)]
   pub type Versions<T: Config> =
@@ -128,7 +129,7 @@ pub mod pallet {
 
         // make sure all reference versions exist
         if let OpCode::Reference(v) = opcode {
-          if *v > last_version {
+          if v.0 > last_version.0 {
             Err(Error::<T>::InvalidReference)?;
           }
           reference_in_hand = true;
@@ -160,13 +161,16 @@ pub mod pallet {
       }
 
       // insert the version
-      Versions::<T>::set(&title, Some(0));
+      Versions::<T>::set(&title, Some(ArticleVersion(0)));
 
       // insert the body
-      Articles::<T>::set((&title, 0), Some(Script::new(vec![OpCode::Add(body)]).unwrap()));
+      Articles::<T>::set(
+        (&title, ArticleVersion(0)),
+        Some(Script::new(vec![OpCode::Add(body)]).unwrap()),
+      );
 
       // insert the author
-      Authors::<T>::set((title, 0), Some(from));
+      Authors::<T>::set((title, ArticleVersion(0)), Some(from));
       Ok(())
     }
 
@@ -180,8 +184,9 @@ pub mod pallet {
 
       // update the versions
       // we can unwrap here since we pass the validation, so we have the title hence a version
-      let version =
-        Self::versions(&title).unwrap().checked_add(1).ok_or(Error::<T>::TooManyVersions)?;
+      let version = ArticleVersion(
+        Self::versions(&title).unwrap().0.checked_add(1).ok_or(Error::<T>::TooManyVersions)?,
+      );
       Versions::<T>::set(&title, Some(version));
 
       // insert the body for the version
