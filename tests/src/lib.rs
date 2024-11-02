@@ -5,9 +5,37 @@ use std::{
   process::Command,
 };
 
-use wikiblocks_client::{Wikiblocks, Transaction};
+use sp_core::sr25519::Pair;
+
+use wikiblocks_abi::primitives::SubstrateAmount;
+use wikiblocks_client::{Wikiblocks, Transaction, WikiblocksValidatorSets};
 
 mod articles;
+mod validator_sets;
+
+#[allow(dead_code)]
+pub async fn allocate_stake(
+  wikiblocks: &Wikiblocks,
+  amount: SubstrateAmount,
+  pair: &Pair,
+  nonce: u32,
+) -> [u8; 32] {
+  // get the call
+  let tx = wikiblocks.sign(pair, WikiblocksValidatorSets::allocate(amount), nonce, 0);
+  publish_tx(wikiblocks, &tx).await
+}
+
+#[allow(dead_code)]
+pub async fn deallocate_stake(
+  wikiblocks: &Wikiblocks,
+  amount: SubstrateAmount,
+  pair: &Pair,
+  nonce: u32,
+) -> [u8; 32] {
+  // get the call
+  let tx = wikiblocks.sign(pair, WikiblocksValidatorSets::deallocate(amount), nonce, 0);
+  publish_tx(wikiblocks, &tx).await
+}
 
 #[allow(dead_code)]
 pub async fn publish_tx(wikiblocks: &Wikiblocks, tx: &Transaction) -> [u8; 32] {
@@ -51,9 +79,16 @@ pub async fn publish_tx(wikiblocks: &Wikiblocks, tx: &Transaction) -> [u8; 32] {
 }
 
 pub fn docker_build() {
-  let repo_path = std::path::PathBuf::from("/Users/akilbozbas/wikiblocks");
-  let dockerfile_path =
-    std::path::PathBuf::from("/Users/akilbozbas/wikiblocks/tests/docker/Dockerfile");
+  // Else, hold the lock while we build
+  let mut repo_path = std::env::current_exe().unwrap();
+  repo_path.pop();
+  assert!(repo_path.as_path().ends_with("deps"));
+  repo_path.pop();
+  assert!(repo_path.as_path().ends_with("debug"));
+  repo_path.pop();
+  assert!(repo_path.as_path().ends_with("target"));
+  repo_path.pop();
+  let dockerfile_path = repo_path.clone().join("tests").join("docker").join("Dockerfile");
 
   // If this Docker image was created after this repo was last edited, return here
   // This should have better performance than Docker and allows running while offline

@@ -45,7 +45,10 @@ use sp_runtime::{
 };
 
 #[allow(unused_imports)]
-use primitives::{AccountLookup, PublicKey, SubstrateAmount, BLOCK_SIZE, DAYS, TARGET_BLOCK_TIME};
+use primitives::{
+  AccountLookup, PublicKey, SubstrateAmount, BLOCK_SIZE, DAYS, FAST_EPOCH_DURATION,
+  TARGET_BLOCK_TIME,
+};
 
 use support::{
   construct_runtime, parameter_types,
@@ -265,7 +268,7 @@ pub type MaxAuthorities = ConstU32<{ validator_sets::primitives::MAX_KEY_SHARES_
 pub type ReportLongevity = <Runtime as pallet_babe::Config>::EpochDuration;
 
 impl babe::Config for Runtime {
-  type EpochDuration = ConstU64<{ 4 * 7 * DAYS }>;
+  type EpochDuration = ConstU64<{ FAST_EPOCH_DURATION }>;
 
   type ExpectedBlockTime = ConstU64<{ TARGET_BLOCK_TIME * 1000 }>;
   type EpochChangeTrigger = babe::ExternalTrigger;

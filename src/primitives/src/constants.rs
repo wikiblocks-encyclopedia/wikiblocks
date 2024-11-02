@@ -18,3 +18,6 @@ pub const YEARS: BlockNumber = 12 * MONTHS;
 // 1000b/1usd rate for data insert into the chain.
 // this represent a usd. 1000 mill.
 pub const DATA_FEE_RATE: u64 = 1000;
+
+/// Amount of blocks per epoch in the fast-epoch feature that is used in tests.
+pub const FAST_EPOCH_DURATION: u64 = MINUTES;
