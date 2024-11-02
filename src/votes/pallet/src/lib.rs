@@ -51,10 +51,10 @@ pub mod pallet {
       }
 
       // make sure version exist
-      let Some(versions) = Articles::<T>::versions(&title) else {
+      let Some(last_version) = Articles::<T>::last_version(&title) else {
         return Err(Error::<T>::InvalidVersion)?;
       };
-      if version.0 > versions.0 {
+      if version.0 > last_version.0 {
         Err(Error::<T>::InvalidVersion)?;
       }
 

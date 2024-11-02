@@ -23,8 +23,8 @@ fn add_article() {
     assert_eq!(titles, vec![title.clone()]);
 
     // check that we have a version 0 for it
-    let versions = Articles::versions(&title).unwrap();
-    assert_eq!(versions, ArticleVersion(0));
+    let last_version = Articles::last_version(&title).unwrap();
+    assert_eq!(last_version, ArticleVersion(0));
 
     // check that we have a body for the version
     let in_chain_script = Articles::articles((&title, ArticleVersion(0))).unwrap();
@@ -68,8 +68,8 @@ fn add_version() {
     assert_eq!(titles, vec![title.clone()]);
 
     // check that we have 2 version of it
-    let versions = Articles::versions(&title).unwrap();
-    assert_eq!(versions, ArticleVersion(1)); // 0, 1
+    let last_version = Articles::last_version(&title).unwrap();
+    assert_eq!(last_version, ArticleVersion(1)); // 0, 1
 
     // check that we have a body for the version
     let in_chain_script = Articles::articles((&title, ArticleVersion(1))).unwrap();

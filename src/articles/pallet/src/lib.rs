@@ -45,10 +45,9 @@ pub mod pallet {
 
   /// Stores the last article version. If this returns Let's say `ArticleVersion(5)` that means
   /// there are versions 0, 1, 2, 3, 4, 5 for the article.
-  /// // TODO: rename to LastVersion
   #[pallet::storage]
-  #[pallet::getter(fn versions)]
-  pub type Versions<T: Config> =
+  #[pallet::getter(fn last_version)]
+  pub type LastVersion<T: Config> =
     StorageMap<_, Blake2_128Concat, Title, ArticleVersion, OptionQuery>;
 
   #[pallet::storage]
@@ -119,7 +118,7 @@ pub mod pallet {
       }
 
       // verify the opcodes
-      let last_version = Self::versions(title).ok_or(Error::<T>::InvalidTitle)?;
+      let last_version = Self::last_version(title).ok_or(Error::<T>::InvalidTitle)?;
       let mut reference_in_hand = false;
       for opcode in script.data() {
         // add version script can't have a Title opcode
@@ -161,7 +160,7 @@ pub mod pallet {
       }
 
       // insert the version
-      Versions::<T>::set(&title, Some(ArticleVersion(0)));
+      LastVersion::<T>::set(&title, Some(ArticleVersion(0)));
 
       // insert the body
       Articles::<T>::set(
@@ -185,9 +184,9 @@ pub mod pallet {
       // update the versions
       // we can unwrap here since we pass the validation, so we have the title hence a version
       let version = ArticleVersion(
-        Self::versions(&title).unwrap().0.checked_add(1).ok_or(Error::<T>::TooManyVersions)?,
+        Self::last_version(&title).unwrap().0.checked_add(1).ok_or(Error::<T>::TooManyVersions)?,
       );
-      Versions::<T>::set(&title, Some(version));
+      LastVersion::<T>::set(&title, Some(version));
 
       // insert the body for the version
       Articles::<T>::set((&title, version), Some(script));
