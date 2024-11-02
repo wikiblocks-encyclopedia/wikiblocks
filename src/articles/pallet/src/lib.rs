@@ -15,7 +15,7 @@ pub mod pallet {
   use sp_core::sr25519::Public;
   use sp_std::vec;
 
-  use wikiblocks_primitives::{ArticleVersion, Body, OpCode, Script, Title, MAX_DATA_LEN};
+  use wikiblocks_primitives::{ArticleVersion, Body, OpCode, Script, Title, Article, MAX_DATA_LEN};
 
   #[pallet::config]
   pub trait Config: frame_system::Config<AccountId = Public> {
@@ -52,13 +52,11 @@ pub mod pallet {
 
   #[pallet::storage]
   #[pallet::getter(fn articles)]
-  pub type Articles<T: Config> =
-    StorageMap<_, Blake2_128Concat, (Title, ArticleVersion), Script, OptionQuery>;
+  pub type Articles<T: Config> = StorageMap<_, Blake2_128Concat, Article, Script, OptionQuery>;
 
   #[pallet::storage]
   #[pallet::getter(fn authors)]
-  pub type Authors<T: Config> =
-    StorageMap<_, Blake2_128Concat, (Title, ArticleVersion), Public, OptionQuery>;
+  pub type Authors<T: Config> = StorageMap<_, Blake2_128Concat, Article, Public, OptionQuery>;
 
   impl<T: Config> Pallet<T> {
     // TODO: this can be optimized to O(1) using maps
@@ -154,22 +152,22 @@ pub mod pallet {
       // TODO: we should prevent the cloning here
       let (title, body) = Self::validate_add_article_script(&script)?;
 
-      // insert the title
+      // try inserting the title
       if Titles::<T>::try_append(&title).is_err() {
         Err(Error::<T>::StorageFull)?;
       }
 
-      // insert the version
-      LastVersion::<T>::set(&title, Some(ArticleVersion(0)));
+      // make the article
+      let article = Article::new(title, ArticleVersion(0));
+
+      // update last version
+      LastVersion::<T>::set(article.title(), Some(article.version()));
 
       // insert the body
-      Articles::<T>::set(
-        (&title, ArticleVersion(0)),
-        Some(Script::new(vec![OpCode::Add(body)]).unwrap()),
-      );
+      Articles::<T>::set(&article, Some(Script::new(vec![OpCode::Add(body)]).unwrap()));
 
       // insert the author
-      Authors::<T>::set((title, ArticleVersion(0)), Some(from));
+      Authors::<T>::set(article, Some(from));
       Ok(())
     }
 
@@ -186,13 +184,18 @@ pub mod pallet {
       let version = ArticleVersion(
         Self::last_version(&title).unwrap().0.checked_add(1).ok_or(Error::<T>::TooManyVersions)?,
       );
-      LastVersion::<T>::set(&title, Some(version));
+
+      // construct the article
+      let article = Article::new(title, version);
+
+      // update last version
+      LastVersion::<T>::set(article.title(), Some(article.version()));
 
       // insert the body for the version
-      Articles::<T>::set((&title, version), Some(script));
+      Articles::<T>::set(&article, Some(script));
 
       // insert the author
-      Authors::<T>::set((&title, version), Some(from));
+      Authors::<T>::set(article, Some(from));
       Ok(())
     }
   }

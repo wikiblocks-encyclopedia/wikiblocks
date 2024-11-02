@@ -40,12 +40,6 @@ pub use script::*;
 pub type BlockNumber = u64;
 pub type Header = sp_runtime::generic::Header<BlockNumber, sp_runtime::traits::BlakeTwo256>;
 
-// A version of an article
-#[derive(Clone, Copy, PartialEq, Eq, Debug, Encode, Decode, MaxEncodedLen, TypeInfo)]
-#[cfg_attr(feature = "borsh", derive(BorshSerialize, BorshDeserialize))]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-pub struct ArticleVersion(pub u32);
-
 #[cfg(feature = "borsh")]
 pub fn borsh_serialize_bounded_vec<W: borsh::io::Write, T: BorshSerialize, const B: u32>(
   bounded: &BoundedVec<T, ConstU32<B>>,
@@ -60,6 +54,32 @@ pub fn borsh_deserialize_bounded_vec<R: borsh::io::Read, T: BorshDeserialize, co
 ) -> Result<BoundedVec<T, ConstU32<B>>, borsh::io::Error> {
   let vec: Vec<T> = borsh::BorshDeserialize::deserialize_reader(reader)?;
   vec.try_into().map_err(|_| borsh::io::Error::other("bound exceeded"))
+}
+
+// A version of an article
+#[derive(Clone, Copy, PartialEq, Eq, Debug, Encode, Decode, MaxEncodedLen, TypeInfo)]
+#[cfg_attr(feature = "borsh", derive(BorshSerialize, BorshDeserialize))]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+pub struct ArticleVersion(pub u32);
+
+// Type to identify a given article
+#[derive(Clone, PartialEq, Eq, Debug, Encode, Decode, MaxEncodedLen, TypeInfo)]
+#[cfg_attr(feature = "borsh", derive(BorshSerialize, BorshDeserialize))]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+pub struct Article(Title, ArticleVersion);
+
+impl Article {
+  pub fn new(title: Title, version: ArticleVersion) -> Self {
+    Article(title, version)
+  }
+
+  pub fn title(&self) -> &Title {
+    &self.0
+  }
+
+  pub fn version(&self) -> ArticleVersion {
+    self.1
+  }
 }
 
 // Should be enough for a title

@@ -4,7 +4,9 @@ use frame_support::{assert_noop, assert_ok};
 use frame_system::RawOrigin;
 
 use sp_core::Pair;
-use wikiblocks_primitives::{insecure_pair_from_name, ArticleVersion, Body, OpCode, Script, Title};
+use wikiblocks_primitives::{
+  insecure_pair_from_name, Article, ArticleVersion, Body, OpCode, Script, Title,
+};
 
 #[test]
 fn add_article() {
@@ -17,21 +19,22 @@ fn add_article() {
     let script =
       Script::new(vec![OpCode::Title(title.clone()), OpCode::Add(body.clone())]).unwrap();
     assert_ok!(Articles::add_article(RawOrigin::Signed(user).into(), script.clone()));
+    let article = Article::new(title, ArticleVersion(0));
 
     // check that titles have 1 item that is correct
     let titles = Articles::titles();
-    assert_eq!(titles, vec![title.clone()]);
+    assert_eq!(titles, vec![(*article.title()).clone()]);
 
-    // check that we have a version 0 for it
-    let last_version = Articles::last_version(&title).unwrap();
-    assert_eq!(last_version, ArticleVersion(0));
+    // check that we have the version for it
+    let last_version = Articles::last_version(article.title()).unwrap();
+    assert_eq!(last_version, article.version());
 
     // check that we have a body for the version
-    let in_chain_script = Articles::articles((&title, ArticleVersion(0))).unwrap();
+    let in_chain_script = Articles::articles(&article).unwrap();
     assert_eq!(in_chain_script, Script::new(vec![OpCode::Add(body)]).unwrap());
 
     // check the author is right
-    let author = Articles::authors((&title, ArticleVersion(0))).unwrap();
+    let author = Articles::authors(article).unwrap();
     assert_eq!(author, user);
   })
 }
@@ -72,7 +75,7 @@ fn add_version() {
     assert_eq!(last_version, ArticleVersion(1)); // 0, 1
 
     // check that we have a body for the version
-    let in_chain_script = Articles::articles((&title, ArticleVersion(1))).unwrap();
+    let in_chain_script = Articles::articles(Article::new(title, ArticleVersion(1))).unwrap();
     assert_eq!(in_chain_script, script);
   })
 }
