@@ -1,5 +1,7 @@
 use scale::Encode;
 
+use sp_core::sr25519::Public;
+
 use wikiblocks_abi::primitives::{Article, Script, Title};
 pub use wikiblocks_abi::coins::primitives;
 
@@ -25,7 +27,7 @@ impl<'a> WikiblocksArticles<'a> {
       .await
   }
 
-  pub async fn author(&self, article: Article) -> Result<Option<Script>, WikiblocksError> {
+  pub async fn author(&self, article: Article) -> Result<Option<Public>, WikiblocksError> {
     self
       .0
       .storage(PALLET, "Authors", (sp_core::hashing::blake2_128(&article.encode()), article))
