@@ -13,7 +13,9 @@ pub mod timestamp;
 
 pub mod coins;
 pub mod validator_sets;
+
 pub mod articles;
+pub mod votes;
 
 pub mod babe;
 pub mod grandpa;
@@ -26,6 +28,7 @@ pub enum Call {
   Coins(coins::Call),
   ValidatorSets(validator_sets::Call),
   Articles(articles::Call),
+  Votes(votes::Call),
   Babe(babe::Call),
   Grandpa(grandpa::Call),
 }
@@ -44,6 +47,7 @@ pub enum Event {
   Coins(coins::Event),
   ValidatorSets(validator_sets::Event),
   Articles,
+  Votes,
   Babe,
   Grandpa(grandpa::Event),
 }

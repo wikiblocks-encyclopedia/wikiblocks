@@ -5,7 +5,7 @@ use scale::{Encode, Decode};
 use wikiblocks_abi::Call;
 
 use crate::{
-  timestamp, coins, articles,
+  timestamp, coins, articles, votes,
   validator_sets::{self, MembershipProof},
   babe, grandpa, RuntimeCall,
 };
@@ -41,6 +41,11 @@ impl From<Call> for RuntimeCall {
         }
         wikiblocks_abi::articles::Call::add_version { title, script } => {
           RuntimeCall::Articles(articles::Call::add_version { title, script })
+        }
+      },
+      Call::Votes(votes) => match votes {
+        wikiblocks_abi::votes::Call::upvote { article } => {
+          RuntimeCall::Votes(votes::Call::upvote { article })
         }
       },
       Call::Babe(babe) => match babe {
@@ -117,6 +122,10 @@ impl TryInto<Call> for RuntimeCall {
         articles::Call::add_version { title, script } => {
           wikiblocks_abi::articles::Call::add_version { title, script }
         }
+        _ => Err(())?,
+      }),
+      RuntimeCall::Votes(call) => Call::Votes(match call {
+        votes_pallet::Call::upvote { article } => wikiblocks_abi::votes::Call::upvote { article },
         _ => Err(())?,
       }),
       RuntimeCall::Babe(call) => Call::Babe(match call {
