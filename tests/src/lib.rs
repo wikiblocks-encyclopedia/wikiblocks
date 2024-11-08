@@ -219,19 +219,19 @@ macro_rules! wikiblocks_test {
         test.provide_container(composition);
         test.run_async(|ops| async move {
           // Sleep until the Substrate RPC starts
-          let serai_rpc = ops.handle(handle).host_port(9944).unwrap();
-          let serai_rpc = format!("http://{}:{}", serai_rpc.0, serai_rpc.1);
+          let wikiblocks_rpc = ops.handle(handle).host_port(9944).unwrap();
+          let wikiblocks_rpc = format!("http://{}:{}", wikiblocks_rpc.0, wikiblocks_rpc.1);
           // Bound execution to 60 seconds
           for _ in 0 .. 60 {
             tokio::time::sleep(core::time::Duration::from_secs(1)).await;
-            let Ok(client) = Wikiblocks::new(serai_rpc.clone()).await else { continue };
+            let Ok(client) = Wikiblocks::new(wikiblocks_rpc.clone()).await else { continue };
             if client.latest_finalized_block_hash().await.is_err() {
               continue;
             }
             break;
           }
           #[allow(clippy::redundant_closure_call)]
-          $test(Wikiblocks::new(serai_rpc).await.unwrap()).await;
+          $test(Wikiblocks::new(wikiblocks_rpc).await.unwrap()).await;
         }).await;
       }
     )*

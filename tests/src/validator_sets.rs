@@ -147,7 +147,7 @@ async fn session_for_block(wikiblocks: &Wikiblocks, block: [u8; 32]) -> u32 {
 
 #[allow(dead_code)]
 async fn verify_session_and_active_validators(
-  serai: &Wikiblocks,
+  wikiblocks: &Wikiblocks,
   session: u32,
   participants: &[Public],
 ) {
@@ -156,40 +156,41 @@ async fn verify_session_and_active_validators(
     core::time::Duration::from_secs(FAST_EPOCH_DURATION * TARGET_BLOCK_TIME * 2),
     async move {
       loop {
-        let mut block = serai.latest_finalized_block_hash().await.unwrap();
-        if session_for_block(serai, block).await < session {
+        let mut block = wikiblocks.latest_finalized_block_hash().await.unwrap();
+        if session_for_block(wikiblocks, block).await < session {
           // Sleep a block
           tokio::time::sleep(core::time::Duration::from_secs(TARGET_BLOCK_TIME)).await;
           continue;
         }
-        while session_for_block(serai, block).await > session {
-          block = serai.block(block).await.unwrap().unwrap().header.parent_hash.0;
+        while session_for_block(wikiblocks, block).await > session {
+          block = wikiblocks.block(block).await.unwrap().unwrap().header.parent_hash.0;
         }
-        assert_eq!(session_for_block(serai, block).await, session);
+        assert_eq!(session_for_block(wikiblocks, block).await, session);
         break block;
       }
     },
   )
   .await
   .unwrap();
-  let serai_for_block = serai.as_of(block);
+  let wikiblocks_for_block = wikiblocks.as_of(block);
 
   // verify session
-  let s = serai_for_block.validator_sets().session().await.unwrap().unwrap();
+  let s = wikiblocks_for_block.validator_sets().session().await.unwrap().unwrap();
   assert_eq!(s.0, session);
 
   // verify participants
-  let mut validators = serai_for_block.validator_sets().active_network_validators().await.unwrap();
+  let mut validators =
+    wikiblocks_for_block.validator_sets().active_network_validators().await.unwrap();
   validators.sort();
   assert_eq!(validators, participants);
 
   // make sure finalization continues as usual after the changes
-  let current_finalized_block = serai.latest_finalized_block().await.unwrap().header.number;
+  let current_finalized_block = wikiblocks.latest_finalized_block().await.unwrap().header.number;
   tokio::time::timeout(core::time::Duration::from_secs(TARGET_BLOCK_TIME * 10), async move {
-    let mut finalized_block = serai.latest_finalized_block().await.unwrap().header.number;
+    let mut finalized_block = wikiblocks.latest_finalized_block().await.unwrap().header.number;
     while finalized_block <= current_finalized_block + 2 {
       tokio::time::sleep(core::time::Duration::from_secs(TARGET_BLOCK_TIME)).await;
-      finalized_block = serai.latest_finalized_block().await.unwrap().header.number;
+      finalized_block = wikiblocks.latest_finalized_block().await.unwrap().header.number;
     }
   })
   .await
@@ -198,8 +199,7 @@ async fn verify_session_and_active_validators(
   // TODO: verify key shares as well?
 }
 
-// changes should be active in the next session
-// it takes 1 extra session for serai net to make the changes active.
+// changes should be active in session after next session
 #[allow(dead_code)]
 async fn get_session_at_which_changes_activate(wikiblocks: &Wikiblocks, hash: [u8; 32]) -> u32 {
   session_for_block(wikiblocks, hash).await + 2
