@@ -8678,6 +8678,28 @@ dependencies = [
 ]
 
 [[package]]
+name = "wikiblocks-emissions-pallet"
+version = "0.1.0"
+dependencies = [
+ "frame-support",
+ "frame-system",
+ "pallet-babe",
+ "pallet-grandpa",
+ "pallet-timestamp",
+ "parity-scale-codec",
+ "scale-info",
+ "sp-core",
+ "sp-io",
+ "sp-runtime",
+ "sp-std",
+ "wikiblocks-abi",
+ "wikiblocks-coins-pallet",
+ "wikiblocks-primitives",
+ "wikiblocks-validator-sets-pallet",
+ "wikiblocks-validator-sets-primitives",
+]
+
+[[package]]
 name = "wikiblocks-node"
 version = "0.1.0"
 dependencies = [
@@ -8776,6 +8798,7 @@ dependencies = [
  "wikiblocks-abi",
  "wikiblocks-articles-pallet",
  "wikiblocks-coins-pallet",
+ "wikiblocks-emissions-pallet",
  "wikiblocks-primitives",
  "wikiblocks-validator-sets-pallet",
  "wikiblocks-votes-pallet",

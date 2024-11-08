@@ -6,8 +6,8 @@ use sp_core::{Decode, Pair as PairTrait, sr25519::Public};
 use sc_service::ChainType;
 
 use wikiblocks_runtime::{
-  primitives::*, WASM_BINARY, BABE_GENESIS_EPOCH_CONFIG, RuntimeGenesisConfig, SystemConfig,
-  CoinsConfig, ValidatorSetsConfig, BabeConfig, GrandpaConfig,
+  primitives::*, BabeConfig, CoinsConfig, EmissionsConfig, GrandpaConfig, RuntimeGenesisConfig,
+  SystemConfig, ValidatorSetsConfig, BABE_GENESIS_EPOCH_CONFIG, WASM_BINARY,
 };
 
 pub type ChainSpec = sc_service::GenericChainSpec<RuntimeGenesisConfig>;
@@ -50,6 +50,10 @@ fn devnet_genesis(
       participants: validators.iter().map(|validator| (*validator, key_share_amount)).collect(),
     },
 
+    emissions: EmissionsConfig {
+      participants: validators.iter().map(|validator| (*validator, key_share_amount)).collect(),
+    },
+
     babe: BabeConfig {
       authorities: validators.iter().map(|validator| ((*validator).into(), 1)).collect(),
       epoch_config: Some(BABE_GENESIS_EPOCH_CONFIG),
@@ -82,6 +86,10 @@ fn testnet_genesis(wasm_binary: &[u8], validators: Vec<&'static str>) -> Runtime
 
     validator_sets: ValidatorSetsConfig {
       key_share_amount: 50_000 * 10_u64.pow(8),
+      participants: validators.iter().map(|validator| (*validator, key_share_amount)).collect(),
+    },
+
+    emissions: EmissionsConfig {
       participants: validators.iter().map(|validator| (*validator, key_share_amount)).collect(),
     },
 

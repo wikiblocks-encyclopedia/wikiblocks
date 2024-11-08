@@ -22,6 +22,7 @@ pub use pallet_transaction_payment as transaction_payment;
 
 pub use coins_pallet as coins;
 pub use validator_sets_pallet as validator_sets;
+pub use emissions_pallet as emissions;
 
 pub use articles_pallet as articles;
 pub use votes_pallet as votes;
@@ -224,7 +225,6 @@ impl coins::Config for Runtime {
 
 impl validator_sets::Config for Runtime {
   type RuntimeEvent = RuntimeEvent;
-
   type ShouldEndSession = Babe;
 }
 
@@ -233,6 +233,10 @@ impl articles::Config for Runtime {
 }
 
 impl votes::Config for Runtime {
+  type RuntimeEvent = RuntimeEvent;
+}
+
+impl emissions::Config for Runtime {
   type RuntimeEvent = RuntimeEvent;
 }
 
@@ -312,6 +316,7 @@ construct_runtime!(
 
     Coins: coins,
     ValidatorSets: validator_sets,
+    Emissions: emissions,
     Articles: articles,
     Votes: votes,
 

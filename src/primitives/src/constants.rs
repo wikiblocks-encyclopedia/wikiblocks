@@ -21,3 +21,6 @@ pub const DATA_FEE_RATE: u64 = 1000;
 
 /// Amount of blocks per epoch in the fast-epoch feature that is used in tests.
 pub const FAST_EPOCH_DURATION: u64 = MINUTES;
+
+/// REWARD = 10M / BLOCKS_PER_YEAR
+pub const REWARD_PER_BLOCK: u64 = (10_000_000 * 10u64.pow(8)) / YEARS;

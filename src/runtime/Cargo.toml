@@ -57,8 +57,9 @@ pallet-authorship = { git = "https://github.com/serai-dex/substrate", default-fe
 pallet-transaction-payment = { git = "https://github.com/serai-dex/substrate", default-features = false }
 
 coins-pallet = { package = "wikiblocks-coins-pallet", path = "../coins/pallet", default-features = false }
-
 validator-sets-pallet = { package = "wikiblocks-validator-sets-pallet", path = "../validator-sets/pallet", default-features = false }
+emissions-pallet = { package = "wikiblocks-emissions-pallet", path = "../emissions/pallet", default-features = false }
+
 
 articles-pallet = { package = "wikiblocks-articles-pallet", path = "../articles/pallet", default-features = false }
 votes-pallet = { package = "wikiblocks-votes-pallet", path = "../votes/pallet", default-features = false }
@@ -110,8 +111,8 @@ std = [
   "pallet-transaction-payment/std",
 
   "coins-pallet/std",
-
   "validator-sets-pallet/std",
+  "emissions-pallet/std",
 
   "articles-pallet/std",
   "votes-pallet/std",
