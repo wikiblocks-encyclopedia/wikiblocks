@@ -297,7 +297,7 @@ pub mod pallet {
   }
 
   impl<T: Config> Pallet<T> {
-    fn new_session() {
+    pub fn new_session() {
       // TODO: prevent new set if it doesn't have enough stake for economic security.
 
       // Update CurrentSession
@@ -311,6 +311,7 @@ pub mod pallet {
       // Clear the current InSet
       assert_eq!(InSet::<T>::clear(MAX_KEY_SHARES_PER_SET, None).maybe_cursor, None);
 
+      let mut total_allocated_stake = 0;
       let mut participants = vec![];
       {
         let mut iter = SortedAllocationsIter::<T>::new();
@@ -322,6 +323,7 @@ pub mod pallet {
             (amount / Self::allocation_per_key_share()).min(u64::from(MAX_KEY_SHARES_PER_SET));
           participants.push((key, these_key_shares));
 
+          total_allocated_stake += amount;
           key_shares += these_key_shares;
         }
         amortize_excess_key_shares(&mut participants);
@@ -334,6 +336,8 @@ pub mod pallet {
       Pallet::<T>::deposit_event(Event::NewSession { session });
 
       Participants::<T>::set(Some(participants.try_into().unwrap()));
+      TotalAllocatedStake::<T>::set(Some(total_allocated_stake));
+
       SessionBeginBlock::<T>::set(
         session,
         <frame_system::Pallet<T>>::block_number().saturated_into::<u64>(),
