@@ -38,8 +38,6 @@ allow = [
 ]
 
 exceptions = [
-  { allow = ["AGPL-3.0"], name = "serai-env" },
-
   { allow = ["AGPL-3.0"], name = "wikiblocks-coins-pallet" },
   { allow = ["AGPL-3.0"], name = "wikiblocks-validator-sets-pallet" },
 
@@ -66,8 +64,6 @@ unknown-registry = "deny"
 unknown-git = "deny"
 allow-registry = ["https://github.com/rust-lang/crates.io-index"]
 allow-git = [
-  "https://github.com/rust-lang-nursery/lazy-static.rs",
   "https://github.com/serai-dex/substrate-bip39",
   "https://github.com/serai-dex/substrate",
-  "https://github.com/alloy-rs/core",
 ]

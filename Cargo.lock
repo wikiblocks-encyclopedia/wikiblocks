@@ -2835,7 +2835,8 @@ dependencies = [
 [[package]]
 name = "lazy_static"
 version = "1.5.0"
-source = "git+https://github.com/rust-lang-nursery/lazy-static.rs?rev=5735630d46572f1e5377c8f2ba0f79d18f53b10c#5735630d46572f1e5377c8f2ba0f79d18f53b10c"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "bbd2bcb4c963f2ddae06a2efc7e9f3591312473c50c6685e1f298068316e66fe"
 
 [[package]]
 name = "lazycell"
