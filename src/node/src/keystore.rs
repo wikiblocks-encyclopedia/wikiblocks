@@ -7,7 +7,7 @@ pub struct Keystore(sr25519::Pair);
 
 impl Keystore {
   pub fn from_env() -> Option<Self> {
-    let mut key_hex = serai_env::var("KEY")?;
+    let mut key_hex = std::env::var("KEY").ok()?;
     if key_hex.trim().is_empty() {
       None?;
     }

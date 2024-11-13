@@ -19,8 +19,6 @@ members = [
   "tests",
 ]
 
-# Always compile Monero (and a variety of dependencies) with optimizations due
-# to the extensive operations required for Bulletproofs
 [profile.dev.package]
 subtle = { opt-level = 3 }
 curve25519-dalek = { opt-level = 3 }

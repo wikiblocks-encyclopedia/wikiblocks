@@ -19,7 +19,7 @@ workspace = true
 [dependencies]
 scale = { package = "parity-scale-codec", version = "3" }
 
-sp-core = { git = "https://github.com/serai-dex/substrate", optional = true }
+sp-core = { git = "https://github.com/serai-dex/substrate" }
 
 wikiblocks-abi = { path = "../src/abi", version = "0.1" }
 wikiblocks-client = { path = "../src/client", features = ["wikiblocks"] }
@@ -29,6 +29,3 @@ tokio = "1"
 chrono = "0.4"
 
 dockertest = "0.5"
-
-[features]
-wikiblocks = ["wikiblocks-client/wikiblocks", "sp-core"]
