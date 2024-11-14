@@ -298,8 +298,6 @@ pub mod pallet {
 
   impl<T: Config> Pallet<T> {
     pub fn new_session() {
-      // TODO: prevent new set if it doesn't have enough stake for economic security.
-
       // Update CurrentSession
       let session = {
         let new_session =
@@ -370,8 +368,6 @@ pub mod pallet {
     BadSignature,
     /// Validator wasn't registered or active.
     NonExistentValidator,
-    /// Deallocation would take the stake below what is required.
-    DeallocationWouldRemoveEconomicSecurity,
   }
 
   #[pallet::hooks]

@@ -12,11 +12,9 @@ use borsh::{BorshSerialize, BorshDeserialize};
 use serde::{Serialize, Deserialize};
 
 use sp_core::sr25519::Public;
-#[cfg(not(feature = "std"))]
-use sp_std::vec::Vec;
 
 /// The maximum amount of key shares per set.
-pub const MAX_KEY_SHARES_PER_SET: u32 = 150;
+pub const MAX_KEY_SHARES_PER_SET: u32 = 600;
 
 /// The type used to identify a specific session of validators.
 #[derive(
