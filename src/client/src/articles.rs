@@ -12,8 +12,8 @@ const PALLET: &str = "Articles";
 #[derive(Clone, Copy)]
 pub struct WikiblocksArticles<'a>(pub(crate) &'a TemporalWikiblocks<'a>);
 impl<'a> WikiblocksArticles<'a> {
-  pub fn add_article(script: Script) -> wikiblocks_abi::Call {
-    wikiblocks_abi::Call::Articles(wikiblocks_abi::articles::Call::add_article { script })
+  pub fn add_article(title: Title, script: Script) -> wikiblocks_abi::Call {
+    wikiblocks_abi::Call::Articles(wikiblocks_abi::articles::Call::add_article { title, script })
   }
 
   pub fn add_version(title: Title, script: Script) -> wikiblocks_abi::Call {

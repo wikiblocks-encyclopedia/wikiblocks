@@ -5,6 +5,6 @@ use wikiblocks_primitives::{Title, Script};
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
 #[cfg_attr(all(feature = "std", feature = "serde"), derive(serde::Deserialize))]
 pub enum Call {
-  add_article { script: Script },
+  add_article { title: Title, script: Script },
   add_version { title: Title, script: Script },
 }

@@ -15,7 +15,7 @@ pub mod pallet {
   use sp_core::sr25519::Public;
   use sp_std::vec;
 
-  use wikiblocks_primitives::{ArticleVersion, Body, OpCode, Script, Title, Article, MAX_DATA_LEN};
+  use wikiblocks_primitives::{ArticleVersion, OpCode, Script, Title, Article, MAX_DATA_LEN};
 
   #[pallet::config]
   pub trait Config: frame_system::Config<AccountId = Public> {
@@ -64,21 +64,20 @@ pub mod pallet {
       Self::titles().iter().any(|t| t == title)
     }
 
-    fn validate_add_article_script(script: &Script) -> Result<(Title, Body), Error<T>> {
-      // first Opcode should be the Title
-      let mut iter = script.data().iter();
-      let opcode = iter.next().ok_or(Error::<T>::InvalidScript)?;
-      let OpCode::Title(title) = opcode else {
-        return Err(Error::<T>::InvalidScript);
-      };
+    fn validate_add_article_script(title: &Title, script: &Script) -> Result<(), Error<T>> {
+      // check title doesn't already exist
+      if Self::title_exist(title) {
+        Err(Error::<T>::TitleAlreadyExist)?;
+      }
 
-      // second Opcode should add a body
+      // first Opcode should add a body
+      let mut iter = script.data().iter();
       let opcode = iter.next().ok_or(Error::<T>::InvalidScript)?;
       let OpCode::Add(body) = opcode else {
         return Err(Error::<T>::InvalidScript);
       };
 
-      // add article Script should have a Title and Body Opcodes only
+      // add article Script should have a Body Opcode only
       if iter.next().is_some() {
         Err(Error::<T>::InvalidScript)?;
       }
@@ -91,12 +90,7 @@ pub mod pallet {
         Err(Error::<T>::InvalidScript)?;
       }
 
-      // check title doesn't already exist
-      if Self::title_exist(title) {
-        Err(Error::<T>::TitleAlreadyExist)?;
-      }
-
-      Ok((title.clone(), body.clone()))
+      Ok(())
     }
 
     fn validate_add_version_script(title: &Title, script: &Script) -> Result<(), Error<T>> {
@@ -146,11 +140,11 @@ pub mod pallet {
   impl<T: Config> Pallet<T> {
     #[pallet::call_index(0)]
     #[pallet::weight((0, DispatchClass::Normal))] // TODO
-    pub fn add_article(origin: OriginFor<T>, script: Script) -> DispatchResult {
+    pub fn add_article(origin: OriginFor<T>, title: Title, script: Script) -> DispatchResult {
       let from = ensure_signed(origin)?;
 
-      // TODO: we should prevent the cloning here
-      let (title, body) = Self::validate_add_article_script(&script)?;
+      // validate the script and title
+      Self::validate_add_article_script(&title, &script)?;
 
       // try inserting the title
       if Titles::<T>::try_append(&title).is_err() {
@@ -164,7 +158,7 @@ pub mod pallet {
       LastVersion::<T>::set(article.title(), Some(article.version()));
 
       // insert the body
-      Articles::<T>::set(&article, Some(Script::new(vec![OpCode::Add(body)]).unwrap()));
+      Articles::<T>::set(&article, Some(script));
 
       // insert the author
       Authors::<T>::set(article, Some(from));

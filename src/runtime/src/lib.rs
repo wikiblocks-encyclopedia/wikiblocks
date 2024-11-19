@@ -201,9 +201,7 @@ impl coins::CallToFee<Runtime> for FeeCollector {
     // TODO: convert following mills to how much token we need through an oracle.
     match call {
       RuntimeCall::Articles(c) => match c {
-        articles_pallet::Call::add_article { script } => {
-          u64::try_from(script.encode().len()).unwrap()
-        }
+        articles_pallet::Call::add_article { title, script } |
         articles_pallet::Call::add_version { title, script } => {
           u64::try_from(title.encode().len() + script.encode().len()).unwrap()
         }

@@ -36,8 +36,8 @@ impl From<Call> for RuntimeCall {
         }
       },
       Call::Articles(articles) => match articles {
-        wikiblocks_abi::articles::Call::add_article { script } => {
-          RuntimeCall::Articles(articles::Call::add_article { script })
+        wikiblocks_abi::articles::Call::add_article { title, script } => {
+          RuntimeCall::Articles(articles::Call::add_article { title, script })
         }
         wikiblocks_abi::articles::Call::add_version { title, script } => {
           RuntimeCall::Articles(articles::Call::add_version { title, script })
@@ -116,8 +116,8 @@ impl TryInto<Call> for RuntimeCall {
         _ => Err(())?,
       }),
       RuntimeCall::Articles(call) => Call::Articles(match call {
-        articles::Call::add_article { script } => {
-          wikiblocks_abi::articles::Call::add_article { script }
+        articles::Call::add_article { title, script } => {
+          wikiblocks_abi::articles::Call::add_article { title, script }
         }
         articles::Call::add_version { title, script } => {
           wikiblocks_abi::articles::Call::add_version { title, script }

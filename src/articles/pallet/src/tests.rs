@@ -16,9 +16,12 @@ fn add_article() {
     let body = Body::new("this is an example article".as_bytes().to_vec()).unwrap();
 
     // send the script
-    let script =
-      Script::new(vec![OpCode::Title(title.clone()), OpCode::Add(body.clone())]).unwrap();
-    assert_ok!(Articles::add_article(RawOrigin::Signed(user).into(), script.clone()));
+    let script = Script::new(vec![OpCode::Add(body.clone())]).unwrap();
+    assert_ok!(Articles::add_article(
+      RawOrigin::Signed(user).into(),
+      title.clone(),
+      script.clone()
+    ));
     let article = Article::new(title, ArticleVersion(0));
 
     // check that titles have 1 item that is correct
@@ -31,7 +34,7 @@ fn add_article() {
 
     // check that we have a body for the version
     let in_chain_script = Articles::articles(&article).unwrap();
-    assert_eq!(in_chain_script, Script::new(vec![OpCode::Add(body)]).unwrap());
+    assert_eq!(in_chain_script, script);
 
     // check the author is right
     let author = Articles::authors(article).unwrap();
@@ -47,9 +50,8 @@ fn add_version() {
     let body = Body::new("this is an example article".as_bytes().to_vec()).unwrap();
 
     // add a title first
-    let script =
-      Script::new(vec![OpCode::Title(title.clone()), OpCode::Add(body.clone())]).unwrap();
-    assert_ok!(Articles::add_article(RawOrigin::Signed(user).into(), script));
+    let script = Script::new(vec![OpCode::Add(body.clone())]).unwrap();
+    assert_ok!(Articles::add_article(RawOrigin::Signed(user).into(), title.clone(), script));
 
     // add a new version for it
     let body2 =
@@ -87,65 +89,56 @@ fn add_article_invalid_script() {
     let title = Title::new("example title".as_bytes().to_vec()).unwrap();
     let body = Body::new("this is an example article".as_bytes().to_vec()).unwrap();
 
-    // title should be first Opcode
-    let opcodes = vec![OpCode::Add(body.clone()), OpCode::Title(title.clone())];
-    let script = Script::new(opcodes).unwrap();
+    // script can't be empty
+    let script = Script::new(vec![]).unwrap();
     assert_noop!(
-      Articles::add_article(RawOrigin::Signed(user).into(), script),
+      Articles::add_article(RawOrigin::Signed(user).into(), title.clone(), script),
       pallet::Error::<Test>::InvalidScript
     );
 
-    // title opcode should be followed by add opcode
-    let opcodes = vec![OpCode::Title(title.clone()), OpCode::Title(title.clone())];
+    // there should only be add opcode
+    let opcodes = vec![OpCode::Title(title.clone())];
     let script = Script::new(opcodes).unwrap();
     assert_noop!(
-      Articles::add_article(RawOrigin::Signed(user).into(), script),
+      Articles::add_article(RawOrigin::Signed(user).into(), title.clone(), script),
       pallet::Error::<Test>::InvalidScript
     );
 
-    // can't have more than 2 opcode
-    let opcodes =
-      vec![OpCode::Title(title.clone()), OpCode::Add(body.clone()), OpCode::Add(body.clone())];
+    // can't have more than 1 opcode
+    let opcodes = vec![OpCode::Title(title.clone()), OpCode::Add(body.clone())];
     let script = Script::new(opcodes).unwrap();
     assert_noop!(
-      Articles::add_article(RawOrigin::Signed(user).into(), script),
-      pallet::Error::<Test>::InvalidScript
-    );
-
-    // can't have empty Script
-    let opcodes = vec![];
-    let script = Script::new(opcodes).unwrap();
-    assert_noop!(
-      Articles::add_article(RawOrigin::Signed(user).into(), script),
+      Articles::add_article(RawOrigin::Signed(user).into(), title.clone(), script),
       pallet::Error::<Test>::InvalidScript
     );
 
     // can't have empty title
-    let opcodes = vec![OpCode::Title(Title::new(vec![]).unwrap()), OpCode::Add(body.clone())];
+    let empty_title = Title::new(vec![]).unwrap();
+    let opcodes = vec![OpCode::Add(body.clone())];
     let script = Script::new(opcodes).unwrap();
     assert_noop!(
-      Articles::add_article(RawOrigin::Signed(user).into(), script),
+      Articles::add_article(RawOrigin::Signed(user).into(), empty_title, script),
       pallet::Error::<Test>::InvalidScript
     );
 
     // can't have empty body
-    let opcodes = vec![OpCode::Title(title.clone()), OpCode::Add(Body::new(vec![]).unwrap())];
+    let opcodes = vec![OpCode::Add(Body::new(vec![]).unwrap())];
     let script = Script::new(opcodes).unwrap();
     assert_noop!(
-      Articles::add_article(RawOrigin::Signed(user).into(), script),
+      Articles::add_article(RawOrigin::Signed(user).into(), title.clone(), script),
       pallet::Error::<Test>::InvalidScript
     );
 
     // valid script
-    let opcodes = vec![OpCode::Title(title.clone()), OpCode::Add(body.clone())];
+    let opcodes = vec![OpCode::Add(body.clone())];
     let script = Script::new(opcodes).unwrap();
-    assert_ok!(Articles::add_article(RawOrigin::Signed(user).into(), script));
+    assert_ok!(Articles::add_article(RawOrigin::Signed(user).into(), title.clone(), script));
 
     // can't add article with the same title
     let body = Body::new("this is second body".as_bytes().to_vec()).unwrap();
-    let script = Script::new(vec![OpCode::Title(title.clone()), OpCode::Add(body)]).unwrap();
+    let script = Script::new(vec![OpCode::Add(body)]).unwrap();
     assert_noop!(
-      Articles::add_article(RawOrigin::Signed(user).into(), script),
+      Articles::add_article(RawOrigin::Signed(user).into(), title, script),
       pallet::Error::<Test>::TitleAlreadyExist
     );
   })
@@ -158,10 +151,10 @@ fn add_version_invalid_script() {
     let title = Title::new("example title".as_bytes().to_vec()).unwrap();
     let body = Body::new("this is an example article".as_bytes().to_vec()).unwrap();
 
-    // valid an article first
-    let opcodes = vec![OpCode::Title(title.clone()), OpCode::Add(body.clone())];
+    // add a valid article first
+    let opcodes = vec![OpCode::Add(body.clone())];
     let script = Script::new(opcodes).unwrap();
-    assert_ok!(Articles::add_article(RawOrigin::Signed(user).into(), script));
+    assert_ok!(Articles::add_article(RawOrigin::Signed(user).into(), title.clone(), script));
 
     // can't have empty Script
     let script = Script::new(vec![]).unwrap();
