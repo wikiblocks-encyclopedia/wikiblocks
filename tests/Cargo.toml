@@ -19,7 +19,7 @@ workspace = true
 [dependencies]
 scale = { package = "parity-scale-codec", version = "3" }
 
-sp-core = { git = "https://github.com/serai-dex/substrate" }
+sp-core = { git = "https://github.com/wikiblocks-encyclopedia/substrate" }
 
 wikiblocks-abi = { path = "../src/abi", version = "0.1" }
 wikiblocks-client = { path = "../src/client", features = ["wikiblocks"] }

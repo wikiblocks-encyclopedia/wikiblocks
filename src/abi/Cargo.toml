@@ -22,13 +22,13 @@ scale-info = { version = "2", default-features = false, features = ["derive"] }
 borsh = { version = "1", default-features = false, features = ["derive", "de_strict_order"], optional = true }
 serde = { version = "1", default-features = false, features = ["derive", "alloc"], optional = true }
 
-sp-core = { git = "https://github.com/serai-dex/substrate", default-features = false }
-sp-runtime = { git = "https://github.com/serai-dex/substrate", default-features = false }
+sp-core = { git = "https://github.com/wikiblocks-encyclopedia/substrate", default-features = false }
+sp-runtime = { git = "https://github.com/wikiblocks-encyclopedia/substrate", default-features = false }
 
-sp-consensus-babe = { git = "https://github.com/serai-dex/substrate", default-features = false }
-sp-consensus-grandpa = { git = "https://github.com/serai-dex/substrate", default-features = false }
+sp-consensus-babe = { git = "https://github.com/wikiblocks-encyclopedia/substrate", default-features = false }
+sp-consensus-grandpa = { git = "https://github.com/wikiblocks-encyclopedia/substrate", default-features = false }
 
-frame-support = { git = "https://github.com/serai-dex/substrate", default-features = false }
+frame-support = { git = "https://github.com/wikiblocks-encyclopedia/substrate", default-features = false }
 
 wikiblocks-primitives = { path = "../primitives", version = "0.1", default-features = false }
 wikiblocks-coins-primitives = { path = "../coins/primitives", version = "0.1", default-features = false }

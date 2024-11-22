@@ -28,9 +28,9 @@ serde_json = { version = "1", optional = true }
 wikiblocks-abi = { path = "../abi", version = "0.1" }
 
 multiaddr = { version = "0.18", optional = true }
-sp-core = { git = "https://github.com/serai-dex/substrate", optional = true }
-sp-runtime = { git = "https://github.com/serai-dex/substrate", optional = true }
-frame-system = { git = "https://github.com/serai-dex/substrate", optional = true }
+sp-core = { git = "https://github.com/wikiblocks-encyclopedia/substrate", optional = true }
+sp-runtime = { git = "https://github.com/wikiblocks-encyclopedia/substrate", optional = true }
+frame-system = { git = "https://github.com/wikiblocks-encyclopedia/substrate", optional = true }
 
 async-lock = "3"
 
