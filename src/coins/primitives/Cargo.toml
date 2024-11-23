@@ -3,7 +3,7 @@ name = "wikiblocks-coins-primitives"
 version = "0.1.0"
 description = "Wikiblocks coins primitives"
 license = "MIT"
-authors = ["Luke Parker <lukeparker5132@gmail.com>"]
+authors = ["Akil <akildemir72@gmail.com>"]
 edition = "2021"
 rust-version = "1.74"
 

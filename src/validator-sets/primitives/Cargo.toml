@@ -4,7 +4,7 @@ version = "0.1.0"
 description = "Primitives for validator sets"
 license = "MIT"
 repository = "https://github.com/akildemir/wikiblocks/tree/develop/substrate/validator-sets/primitives"
-authors = ["Luke Parker <lukeparker5132@gmail.com>"]
+authors = ["Akil <akildemir72@gmail.com>"]
 edition = "2021"
 rust-version = "1.74"
 
