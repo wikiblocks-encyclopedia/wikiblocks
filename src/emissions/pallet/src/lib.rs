@@ -148,8 +148,7 @@ pub mod pallet {
     }
 
     fn update_participants() {
-      let participants = ValidatorSets::<T>::participants_for_latest_decided_set()
-        .unwrap()
+      let participants = ValidatorSets::<T>::current_participants()
         .into_iter()
         .map(|(key, _)| (key, ValidatorSets::<T>::allocation(key).unwrap_or(0)))
         .collect::<Vec<_>>();

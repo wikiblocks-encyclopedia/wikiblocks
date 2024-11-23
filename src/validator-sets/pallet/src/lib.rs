@@ -113,7 +113,7 @@ pub mod pallet {
   #[pallet::getter(fn allocation_per_key_share)]
   pub type AllocationPerKeyShare<T: Config> = StorageValue<_, SubstrateAmount, ValueQuery>;
 
-  /// The validators selected to be in-set (and their key shares), regardless of if removed.
+  /// The validators selected to be in the next set(and their key shares), regardless of if removed.
   ///
   /// This method allows iterating over all validators and their stake.
   #[pallet::storage]
@@ -146,6 +146,11 @@ pub mod pallet {
       } else {
         Self::in_active_set(account)
       }
+    }
+
+    /// Current validator set participants and their key shares.
+    pub fn current_participants() -> Vec<(Public, u64)> {
+      Babe::<T>::authorities().into_iter().map(|(key, w)| (key.into_inner(), w)).collect::<Vec<_>>()
     }
   }
 
